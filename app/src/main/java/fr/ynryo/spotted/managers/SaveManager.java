@@ -2,7 +2,9 @@ package fr.ynryo.spotted.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -80,9 +82,31 @@ public class SaveManager {
             list = gson.fromJson(json, type);
         } catch (JsonSyntaxException e) {
             prefs.edit().remove(KEY_FAVORITE).apply();
-            e.printStackTrace();
+            Log.e(TAG, "Erreur de parsing des favoris", e);
         }
 
         return list != null ? list : new ArrayList<>();
+    }
+
+    public void savePosition(LatLng position) {
+        String json = gson.toJson(position);
+        prefs.edit().putString("position", json).apply();
+    }
+
+    public LatLng loadPosition() {
+        String json = prefs.getString("position", null);
+        if (json == null || json.isEmpty()) return null;
+
+        Type type = new TypeToken<LatLng>() {
+        }.getType();
+        LatLng position = null;
+        try {
+            position = gson.fromJson(json, type);
+        } catch (JsonSyntaxException e) {
+            prefs.edit().remove("position").apply();
+            Log.e(TAG, "Erreur de parsing de la position", e);
+        }
+
+        return position;
     }
 }

@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
     private CompassManager compassManager;
     private FollowManager followManager;
     private FavoriteManager favoriteManager;
+    private SaveManager saveManager;
     private MapManager mapManager;
 
     private boolean isMapReady = false;
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         LayoutManager layoutManager = new LayoutManager(this);
         layoutManager.setupWindowInsets();
 
-        SaveManager saveManager = new SaveManager(this);
+        saveManager = new SaveManager(this);
         fetcher = new FetchingManager(this);
         lateralDrawerActivity = new LateralDrawerActivity(this, saveManager);
         compassManager = new CompassManager(this);
@@ -154,14 +155,14 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         });
 
         findViewById(R.id.btn_open_menu).setOnClickListener(view -> lateralDrawerActivity.open());
-        findViewById(R.id.fab_center_location).setOnClickListener(view -> centerMapOnUserLocation());
+        findViewById(R.id.fab_center_location).setOnClickListener(view -> mapManager.centerOnUserLocation());
     }
 
     private void onEverythingReady() {
         if (!isMapReady || !isDataReady) return;
 
         lateralDrawerActivity.populateNetworks(pendingRegions, pendingNetworks);
-        centerMapOnUserLocation();
+        restoreUserLocation();
         fetchMarkers();
         handler.post(vehicleUpdateRunnable);
     }
@@ -186,18 +187,23 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        followManager.disableFollow(false);
+        handler.removeCallbacks(vehicleUpdateRunnable);
+
+        if (googleMap != null && saveManager != null) {
+            LatLng position = googleMap.getCameraPosition().target;
+            saveManager.savePosition(position);
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (isMapReady && isDataReady) {
             handler.post(vehicleUpdateRunnable);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        followManager.disableFollow(false);
-        handler.removeCallbacks(vehicleUpdateRunnable);
     }
 
     @Override
@@ -253,9 +259,9 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         return mapManager != null && mapManager.hasLocationPermission();
     }
 
-    public void centerMapOnUserLocation() {
+    public void restoreUserLocation() {
         if (mapManager != null) {
-            mapManager.centerOnUserLocation();
+            mapManager.restoreUserLocation();
         }
     }
 
@@ -314,5 +320,9 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
 
     public FavoriteManager getFavoriteManager() {
         return favoriteManager;
+    }
+
+    public SaveManager getSaveManager() {
+        return saveManager;
     }
 }

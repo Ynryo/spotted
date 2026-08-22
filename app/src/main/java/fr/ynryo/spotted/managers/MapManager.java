@@ -112,6 +112,20 @@ public class MapManager implements OnMapReadyCallback {
         }
     }
 
+    public void restoreUserLocation() {
+        if (googleMap == null) return;
+
+        //on test si y'a une position de sauvegardée
+        LatLng position = context.getSaveManager().loadPosition();
+        if (position != null) {
+            animateCamera(position, 15f, 0f, 0f, 1000);
+            return;
+        }
+
+        //sinon on get la dernière loc
+        this.centerOnUserLocation();
+    }
+
     public void centerOnUserLocation() {
         if (googleMap == null) return;
 
@@ -125,6 +139,7 @@ public class MapManager implements OnMapReadyCallback {
                 if (location != null) {
                     Log.d(TAG, "Position utilisateur trouvée: " + location.getLatitude() + ", " + location.getLongitude());
                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    context.getSaveManager().savePosition(userLocation);
                     animateCamera(userLocation, 15f, 0f, 0f, 1000);
                 } else {
                     Log.d(TAG, "getLastLocation() retourne null");
