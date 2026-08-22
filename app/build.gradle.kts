@@ -23,8 +23,8 @@ android {
         applicationId = "fr.ynryo.spotted"
         minSdk = 30
         targetSdk = 36
-        versionName = "1.2.5"
-        versionCode = 125
+        versionName = "1.2.6"
+        versionCode = 126
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
