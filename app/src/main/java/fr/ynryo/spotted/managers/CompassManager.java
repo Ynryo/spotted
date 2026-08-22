@@ -2,9 +2,6 @@ package fr.ynryo.spotted.managers;
 
 import android.widget.ImageView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import fr.ynryo.spotted.MainActivity;
@@ -29,9 +26,8 @@ public class CompassManager {
     }
 
     public void mapToNorth() {
-        GoogleMap mMap = context.getMap();
-        CameraPosition oldPos = mMap.getCameraPosition();
-        CameraPosition pos = CameraPosition.builder(oldPos).bearing(0).build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(pos));
+        if (context.getMapManager() != null) {
+            context.getMapManager().resetToNorth();
+        }
     }
 }
