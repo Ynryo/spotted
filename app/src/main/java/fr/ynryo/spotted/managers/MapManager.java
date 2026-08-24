@@ -21,14 +21,14 @@ import fr.ynryo.spotted.MainActivity;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 
 /**
- * Manager dédié à la gestion de la carte Google Map, de sa configuration et des mouvements de caméra.
+ * Manager dédié à la gestion de la carte Google Maps, de sa configuration et des mouvements de caméra.
  *
  * @author Ynryo
  */
 public class MapManager implements OnMapReadyCallback {
     private static final String TAG = "MapManager";
-    public static final float DEFAULT_ZOOM = 13f;
-    public static final LatLng PARIS = new LatLng(48.8566, 2.3522);
+    public static final float DEFAULT_ZOOM = 5f;
+    public static final LatLng FRANCE = new LatLng(48.8566, 2.3522);
 
     private final MainActivity context;
     private final SupportMapFragment mapFragment;
@@ -76,7 +76,7 @@ public class MapManager implements OnMapReadyCallback {
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         googleMap.setBuildingsEnabled(true);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(PARIS, DEFAULT_ZOOM));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(FRANCE, DEFAULT_ZOOM));
 
         // Configuration des UI settings
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -112,18 +112,47 @@ public class MapManager implements OnMapReadyCallback {
         }
     }
 
-    public void restoreUserLocation() {
+    public void initCameraPosition() {
         if (googleMap == null) return;
 
-        //on test si y'a une position de sauvegardée
-        LatLng position = context.getSaveManager().loadPosition();
-        if (position != null) {
-            animateCamera(position, 15f, 0f, 0f, 1000);
-            return;
+        // 1. On tente le GPS si la permission est accordée
+        if (hasLocationPermission()) {
+            try {
+                fusedLocationClient.getLastLocation().addOnSuccessListener(context, location -> {
+                    if (location != null) {
+                        Log.d(TAG, "Position GPS trouvée au lancement : " + location.getLatitude() + ", " + location.getLongitude());
+                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        animateCamera(userLocation, 15f, 0f, 0f, 1000);
+                    } else {
+                        fallbackToSavedPosition();
+                    }
+                }).addOnFailureListener(e -> {
+                    Log.e(TAG, "Erreur GPS au lancement : " + e.getMessage());
+                    fallbackToSavedPosition();
+                });
+                return;
+            } catch (SecurityException e) {
+                Log.e(TAG, "SecurityException initCameraPosition: " + e.getMessage());
+            }
         }
 
-        //sinon on get la dernière loc
-        this.centerOnUserLocation();
+        // 2. Pas de permission ou erreur : repli sur la position de caméra sauvegardée
+        fallbackToSavedPosition();
+    }
+
+    private void fallbackToSavedPosition() {
+        if (googleMap == null) return;
+        CameraPosition savedPosition = context.getSaveManager().loadCameraPosition();
+        if (savedPosition != null) {
+            Log.d(TAG, "Restauration de la CameraPosition sauvegardée");
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(savedPosition), 1000, null);
+        }
+    }
+
+    public void saveCurrentPosition() {
+        if (googleMap != null && context.getSaveManager() != null) {
+            context.getSaveManager().saveCameraPosition(googleMap.getCameraPosition());
+        }
     }
 
     public void centerOnUserLocation() {
@@ -139,7 +168,7 @@ public class MapManager implements OnMapReadyCallback {
                 if (location != null) {
                     Log.d(TAG, "Position utilisateur trouvée: " + location.getLatitude() + ", " + location.getLongitude());
                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    context.getSaveManager().savePosition(userLocation);
+                    //context.getSaveManager().savePosition(userLocation);
                     animateCamera(userLocation, 15f, 0f, 0f, 1000);
                 } else {
                     Log.d(TAG, "getLastLocation() retourne null");

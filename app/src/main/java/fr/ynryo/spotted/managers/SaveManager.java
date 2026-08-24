@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -25,6 +25,7 @@ public class SaveManager {
     private static final String PREFS_NAME = "ouestcefdpdetramPrefs";
     private static final String KEY_PREFIX_NETWORK = "network_";
     private static final String KEY_FAVORITE = "favorite";
+    private static final String KEY_POSITION = "position";
     private final SharedPreferences prefs;
     private final Gson gson;
 
@@ -88,23 +89,24 @@ public class SaveManager {
         return list != null ? list : new ArrayList<>();
     }
 
-    public void savePosition(LatLng position) {
+    public void saveCameraPosition(CameraPosition position) {
+        if (position == null) return;
         String json = gson.toJson(position);
-        prefs.edit().putString("position", json).apply();
+        prefs.edit().putString(KEY_POSITION, json).apply();
     }
 
-    public LatLng loadPosition() {
-        String json = prefs.getString("position", null);
+    public CameraPosition loadCameraPosition() {
+        String json = prefs.getString(KEY_POSITION, null);
         if (json == null || json.isEmpty()) return null;
 
-        Type type = new TypeToken<LatLng>() {
+        Type type = new TypeToken<CameraPosition>() {
         }.getType();
-        LatLng position = null;
+        CameraPosition position = null;
         try {
             position = gson.fromJson(json, type);
         } catch (JsonSyntaxException e) {
-            prefs.edit().remove("position").apply();
-            Log.e(TAG, "Erreur de parsing de la position", e);
+            prefs.edit().remove(KEY_POSITION).apply();
+            Log.e(TAG, "Erreur de parsing de la position de caméra", e);
         }
 
         return position;
