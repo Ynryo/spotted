@@ -9,7 +9,7 @@
     <string name="vehicle_position">Marker de position du véhicule</string>
     <string name="show_all">Tout afficher</string>
     <string name="open_menu">Ouvrir le menu</string>
-    <string name="destination">Destination</string>
+    <string name="loading">Chargement…</string>
     <string name="_0" translatable="false">0</string>
     <string name="network_logo">Logo du réseau de transport</string>
     <string name="compass_desc">Boussole</string>

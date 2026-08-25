@@ -41,7 +41,7 @@ import fr.ynryo.spotted.managers.favorite.FavoriteManager;
  * Classe principale, gère la vue et les managers
  *
  * @author Ynryo
- * @version 1.2.4
+ * @version 1.2.6
  */
 public class MainActivity extends AppCompatActivity implements GoogleMap.OnCameraIdleListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraMoveStartedListener {
     private static final String TAG = "MainActivity";
@@ -139,7 +139,9 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
                         pendingRegions = regions;
                         pendingNetworks = data;
                         isDataReady = true;
-                        onEverythingReady();
+                        if (lateralDrawerActivity != null) {
+                            lateralDrawerActivity.populateNetworks(pendingRegions, pendingNetworks);
+                        }
                     }
 
                     @Override
@@ -159,16 +161,6 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         findViewById(R.id.fab_center_location).setOnClickListener(view -> centerOnUserLocation());
     }
 
-    private void onEverythingReady() {
-        if (!isMapReady || !isDataReady) return;
-
-        lateralDrawerActivity.populateNetworks(pendingRegions, pendingNetworks);
-        initCameraPosition(() -> {
-            fetchMarkers();
-            handler.post(vehicleUpdateRunnable);
-        });
-    }
-
     private void onMapConfigured(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
         markerArtist.setGoogleMap(this.googleMap);
@@ -181,7 +173,10 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         }
 
         isMapReady = true;
-        onEverythingReady();
+        initCameraPosition(() -> {
+            fetchMarkers();
+            handler.post(vehicleUpdateRunnable);
+        });
     }
 
     public int dpToPx(int dp) {
@@ -202,7 +197,8 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
     @Override
     protected void onResume() {
         super.onResume();
-        if (isMapReady && isDataReady) {
+        if (isMapReady) {
+            handler.removeCallbacks(vehicleUpdateRunnable);
             handler.post(vehicleUpdateRunnable);
         }
     }

@@ -33,7 +33,7 @@ import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
  */
 public class MapManager implements OnMapReadyCallback {
     private static final String TAG = "MapManager";
-    public static final float DEFAULT_ZOOM = 5f;
+    public static final float DEFAULT_ZOOM = 6f;
     public static final LatLng FRANCE = new LatLng(48.8566, 2.3522);
 
     private final MainActivity context;
@@ -80,9 +80,15 @@ public class MapManager implements OnMapReadyCallback {
     private void configureMap() {
         if (googleMap == null) return;
 
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         googleMap.setBuildingsEnabled(true);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(FRANCE, DEFAULT_ZOOM));
+
+        CameraPosition savedPosition = context.getSaveManager() != null ? context.getSaveManager().loadCameraPosition() : null;
+        if (savedPosition != null) {
+            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedPosition));
+        } else {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(FRANCE, DEFAULT_ZOOM));
+        }
 
         // Configuration des UI settings
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -149,10 +155,6 @@ public class MapManager implements OnMapReadyCallback {
         }
     }
 
-    public void initCameraPosition() {
-        initCameraPosition(null);
-    }
-
     public void initCameraPosition(@Nullable Runnable onAnimationFinished) {
         if (googleMap == null) {
             if (onAnimationFinished != null) onAnimationFinished.run();
@@ -163,7 +165,7 @@ public class MapManager implements OnMapReadyCallback {
             if (location != null) {
                 Log.d(TAG, "Position GPS trouvée au lancement : " + location.getLatitude() + ", " + location.getLongitude());
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                animateCamera(userLocation, 15f, 0f, 0f, 2000, new GoogleMap.CancelableCallback() {
+                animateCamera(userLocation, 15f, 0f, 0f, 1000, new GoogleMap.CancelableCallback() {
                     @Override
                     public void onFinish() {
                         if (onAnimationFinished != null) onAnimationFinished.run();
@@ -178,10 +180,6 @@ public class MapManager implements OnMapReadyCallback {
                 fallbackToSavedPosition(onAnimationFinished);
             }
         });
-    }
-
-    private void fallbackToSavedPosition() {
-        fallbackToSavedPosition(null);
     }
 
     private void fallbackToSavedPosition(@Nullable Runnable onAnimationFinished) {
