@@ -6,6 +6,7 @@ import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -149,25 +150,61 @@ public class MapManager implements OnMapReadyCallback {
     }
 
     public void initCameraPosition() {
-        if (googleMap == null) return;
+        initCameraPosition(null);
+    }
+
+    public void initCameraPosition(@Nullable Runnable onAnimationFinished) {
+        if (googleMap == null) {
+            if (onAnimationFinished != null) onAnimationFinished.run();
+            return;
+        }
 
         getGPSPosition(location -> {
             if (location != null) {
                 Log.d(TAG, "Position GPS trouvée au lancement : " + location.getLatitude() + ", " + location.getLongitude());
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                animateCamera(userLocation, 15f, 0f, 0f, 2000);
+                animateCamera(userLocation, 15f, 0f, 0f, 2000, new GoogleMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
+                        if (onAnimationFinished != null) onAnimationFinished.run();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        if (onAnimationFinished != null) onAnimationFinished.run();
+                    }
+                });
             } else {
-                fallbackToSavedPosition();
+                fallbackToSavedPosition(onAnimationFinished);
             }
         });
     }
 
     private void fallbackToSavedPosition() {
-        if (googleMap == null) return;
+        fallbackToSavedPosition(null);
+    }
+
+    private void fallbackToSavedPosition(@Nullable Runnable onAnimationFinished) {
+        if (googleMap == null) {
+            if (onAnimationFinished != null) onAnimationFinished.run();
+            return;
+        }
         CameraPosition savedPosition = context.getSaveManager().loadCameraPosition();
         if (savedPosition != null) {
             Log.d(TAG, "Restauration de la CameraPosition sauvegardée");
-            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(savedPosition), 1000, null);
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(savedPosition), 1000, new GoogleMap.CancelableCallback() {
+                @Override
+                public void onFinish() {
+                    if (onAnimationFinished != null) onAnimationFinished.run();
+                }
+
+                @Override
+                public void onCancel() {
+                    if (onAnimationFinished != null) onAnimationFinished.run();
+                }
+            });
+        } else {
+            if (onAnimationFinished != null) onAnimationFinished.run();
         }
     }
 
@@ -209,6 +246,10 @@ public class MapManager implements OnMapReadyCallback {
     }
 
     public void animateCamera(@NonNull LatLng target, float zoom, float tilt, float bearing, int durationMs) {
+        animateCamera(target, zoom, tilt, bearing, durationMs, null);
+    }
+
+    public void animateCamera(@NonNull LatLng target, float zoom, float tilt, float bearing, int durationMs, @Nullable GoogleMap.CancelableCallback callback) {
         if (googleMap == null) return;
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(target)
@@ -216,7 +257,7 @@ public class MapManager implements OnMapReadyCallback {
                 .tilt(tilt)
                 .bearing(bearing)
                 .build();
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), durationMs, null);
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), durationMs, callback);
     }
 
     public void resetToNorth() {

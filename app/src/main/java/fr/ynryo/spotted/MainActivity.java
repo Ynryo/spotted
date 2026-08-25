@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -162,9 +163,10 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         if (!isMapReady || !isDataReady) return;
 
         lateralDrawerActivity.populateNetworks(pendingRegions, pendingNetworks);
-        initCameraPosition();
-        fetchMarkers();
-        handler.post(vehicleUpdateRunnable);
+        initCameraPosition(() -> {
+            fetchMarkers();
+            handler.post(vehicleUpdateRunnable);
+        });
     }
 
     private void onMapConfigured(@NonNull GoogleMap googleMap) {
@@ -258,9 +260,11 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
         return mapManager != null && mapManager.hasLocationPermission();
     }
 
-    public void initCameraPosition() {
+    public void initCameraPosition(@Nullable Runnable onAnimationFinished) {
         if (mapManager != null) {
-            mapManager.initCameraPosition();
+            mapManager.initCameraPosition(onAnimationFinished);
+        } else if (onAnimationFinished != null) {
+            onAnimationFinished.run();
         }
     }
 
