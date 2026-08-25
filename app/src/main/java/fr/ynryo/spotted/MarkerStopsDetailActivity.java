@@ -121,12 +121,20 @@ public class MarkerStopsDetailActivity {
         behavior.setPeekHeight(calculatePeekHeight());
         behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
 
+        context.findViewById(R.id.btn_open_menu).setVisibility(View.GONE);
+        context.findViewById(R.id.compass).setVisibility(View.GONE);
+        context.findViewById(R.id.fab_center_location).setVisibility(View.GONE);
+
+
         fetchVehicleData(markerStandardized, bottomSheetView);
     }
 
     public void close() {
         if (behavior != null) {
             behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            context.findViewById(R.id.btn_open_menu).setVisibility(View.VISIBLE);
+            context.findViewById(R.id.compass).setVisibility(View.VISIBLE);
+            context.findViewById(R.id.fab_center_location).setVisibility(View.VISIBLE);
         }
         vehicleId = null;
         
