@@ -2,6 +2,7 @@ package fr.ynryo.spotted.managers;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,6 +10,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -16,6 +18,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.CancellationTokenSource;
+
+import java.util.function.Consumer;
 
 import fr.ynryo.spotted.MainActivity;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
@@ -112,32 +117,49 @@ public class MapManager implements OnMapReadyCallback {
         }
     }
 
+    public void getGPSPosition(@NonNull Consumer<Location> callback) {
+        if (!hasLocationPermission()) {
+            callback.accept(null);
+            return;
+        }
+
+        try {
+            // 1 : cache de la position
+            fusedLocationClient.getLastLocation().addOnSuccessListener(context, location -> {
+                if (location != null) {
+                    callback.accept(location);
+                } else {
+                    // 2 : cache vide, on demande la position actuelle
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.getToken())
+                            .addOnSuccessListener(context, callback::accept)
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Erreur getCurrentLocation: " + e.getMessage());
+                                callback.accept(null);
+                            });
+                }
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "Erreur getLastLocation: " + e.getMessage());
+                callback.accept(null);
+            });
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException getGPSPosition: " + e.getMessage());
+            callback.accept(null);
+        }
+    }
+
     public void initCameraPosition() {
         if (googleMap == null) return;
 
-        // 1. On tente le GPS si la permission est accordée
-        if (hasLocationPermission()) {
-            try {
-                fusedLocationClient.getLastLocation().addOnSuccessListener(context, location -> {
-                    if (location != null) {
-                        Log.d(TAG, "Position GPS trouvée au lancement : " + location.getLatitude() + ", " + location.getLongitude());
-                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                        animateCamera(userLocation, 15f, 0f, 0f, 1000);
-                    } else {
-                        fallbackToSavedPosition();
-                    }
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Erreur GPS au lancement : " + e.getMessage());
-                    fallbackToSavedPosition();
-                });
-                return;
-            } catch (SecurityException e) {
-                Log.e(TAG, "SecurityException initCameraPosition: " + e.getMessage());
+        getGPSPosition(location -> {
+            if (location != null) {
+                Log.d(TAG, "Position GPS trouvée au lancement : " + location.getLatitude() + ", " + location.getLongitude());
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                animateCamera(userLocation, 15f, 0f, 0f, 2000);
+            } else {
+                fallbackToSavedPosition();
             }
-        }
-
-        // 2. Pas de permission ou erreur : repli sur la position de caméra sauvegardée
-        fallbackToSavedPosition();
+        });
     }
 
     private void fallbackToSavedPosition() {
@@ -158,27 +180,15 @@ public class MapManager implements OnMapReadyCallback {
     public void centerOnUserLocation() {
         if (googleMap == null) return;
 
-        if (!hasLocationPermission()) {
-            Log.d(TAG, "Pas de permission de localisation - centrage ignoré");
-            return;
-        }
-
-        try {
-            fusedLocationClient.getLastLocation().addOnSuccessListener(context, location -> {
-                if (location != null) {
-                    Log.d(TAG, "Position utilisateur trouvée: " + location.getLatitude() + ", " + location.getLongitude());
-                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    //context.getSaveManager().savePosition(userLocation);
-                    animateCamera(userLocation, 15f, 0f, 0f, 1000);
-                } else {
-                    Log.d(TAG, "getLastLocation() retourne null");
-                }
-            }).addOnFailureListener(e -> Log.e(TAG, "Erreur getLastLocation: " + e.getMessage()));
-        } catch (SecurityException e) {
-            Log.e(TAG, "SecurityException centerOnUserLocation: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "Exception centerOnUserLocation: " + e.getMessage());
-        }
+        getGPSPosition(location -> {
+            if (location != null) {
+                Log.d(TAG, "Position utilisateur trouvée: " + location.getLatitude() + ", " + location.getLongitude());
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                animateCamera(userLocation, 15f, 0f, 0f, 1000);
+            } else {
+                Log.d(TAG, "Impossible de récupérer la position utilisateur pour le centrage");
+            }
+        });
     }
 
     public void centerOnMarker(@NonNull MarkerStandardized markerStandardized, boolean isTilted, boolean isRotated) {
