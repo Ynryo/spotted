@@ -634,14 +634,10 @@ public class MarkerStopsDetailActivity {
             if (stop.isOnLive()) {
                 ivTimeIcon.setImageResource(R.drawable.icon_sensors);
                 ivTimeIcon.setColorFilter(COLOR_GREEN);
-                ivTimeIcon.setVisibility(View.VISIBLE);
-//                vh.tvAtStopTime.setLayoutParams(new LinearLayout.LayoutParams(
-//                        LinearLayout.LayoutParams.WRAP_CONTENT,
-//                        LinearLayout.LayoutParams.WRAP_CONTENT
-//                ));
             } else {
-                ivTimeIcon.setVisibility(View.GONE);
+                ivTimeIcon.setImageResource(R.drawable.icon_no_sensors);
             }
+            ivTimeIcon.setVisibility(View.VISIBLE);
         }
 
         private void bindDelay(StopViewHolder vh, MarkerStop stop) {
