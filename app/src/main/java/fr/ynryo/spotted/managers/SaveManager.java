@@ -22,7 +22,7 @@ import fr.ynryo.spotted.managers.favorite.Favorite;
  */
 public class SaveManager {
     private final static String TAG = "SaveManager";
-    private static final String PREFS_NAME = "ouestcefdpdetramPrefs";
+    private static final String PREFS_NAME = "spotted-prefs";
     private static final String KEY_PREFIX_NETWORK = "network_";
     private static final String KEY_FAVORITE = "favorite";
     private static final String KEY_POSITION = "position";
@@ -110,5 +110,15 @@ public class SaveManager {
         }
 
         return position;
+    }
+
+    public void saveMapType(int mapType) {
+        if (mapType == 0) return;
+
+        prefs.edit().putInt("map_type", mapType).apply();
+    }
+
+    public int loadMapType() {
+        return prefs.getInt("map_type", 0);
     }
 }
