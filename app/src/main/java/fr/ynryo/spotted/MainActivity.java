@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
 
         findViewById(R.id.btn_open_menu).setOnClickListener(view -> lateralDrawerActivity.open());
         findViewById(R.id.fab_center_location).setOnClickListener(view -> centerOnUserLocation());
+        findViewById(R.id.changeMapStyle).setOnClickListener(view -> mapManager.changeMapStyle());
     }
 
     private void onMapConfigured(@NonNull GoogleMap googleMap) {

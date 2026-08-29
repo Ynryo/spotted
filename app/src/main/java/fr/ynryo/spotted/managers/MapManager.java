@@ -1,6 +1,7 @@
 package fr.ynryo.spotted.managers;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.util.Log;
@@ -37,7 +38,6 @@ public class MapManager implements OnMapReadyCallback {
     public static final LatLng FRANCE = new LatLng(48.8566, 2.3522);
 
     private final MainActivity context;
-    private final SupportMapFragment mapFragment;
     private final FusedLocationProviderClient fusedLocationClient;
 
     private GoogleMap googleMap;
@@ -50,12 +50,9 @@ public class MapManager implements OnMapReadyCallback {
 
     public MapManager(@NonNull MainActivity context, SupportMapFragment mapFragment) {
         this.context = context;
-        this.mapFragment = mapFragment;
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
-        if (this.mapFragment != null) {
-            this.mapFragment.getMapAsync(this);
-        }
+        if (mapFragment != null) mapFragment.getMapAsync(this);
     }
 
     public void setOnMapReadyListener(OnMapReadyListener listener) {
@@ -69,18 +66,15 @@ public class MapManager implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
         this.isMapReady = true;
-
         configureMap();
-
-        if (onMapReadyListener != null) {
-            onMapReadyListener.onMapConfigured(googleMap);
-        }
+        if (onMapReadyListener != null) onMapReadyListener.onMapConfigured(googleMap);
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     private void configureMap() {
         if (googleMap == null) return;
 
-        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        googleMap.setMapType(getMapType());
         googleMap.setBuildingsEnabled(true);
 
         CameraPosition savedPosition = context.getSaveManager() != null ? context.getSaveManager().loadCameraPosition() : null;
@@ -103,22 +97,17 @@ public class MapManager implements OnMapReadyCallback {
         googleMap.setOnCameraMoveStartedListener(context);
 
         // Activation de la couche de localisation si permise
-        if (hasLocationPermission()) {
-            enableMyLocationLayer();
-        }
+        if (hasLocationPermission()) enableMyLocationLayer();
     }
 
     public boolean hasLocationPermission() {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public void enableMyLocationLayer() {
         if (googleMap == null) return;
         try {
-            if (hasLocationPermission()) {
-                googleMap.setMyLocationEnabled(true);
-            }
+            if (hasLocationPermission()) googleMap.setMyLocationEnabled(true);
         } catch (SecurityException e) {
             Log.e(TAG, "SecurityException enableMyLocationLayer: " + e.getMessage());
         }
@@ -138,12 +127,10 @@ public class MapManager implements OnMapReadyCallback {
                 } else {
                     // 2 : cache vide, on demande la position actuelle
                     CancellationTokenSource cts = new CancellationTokenSource();
-                    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.getToken())
-                            .addOnSuccessListener(context, callback::accept)
-                            .addOnFailureListener(e -> {
-                                Log.e(TAG, "Erreur getCurrentLocation: " + e.getMessage());
-                                callback.accept(null);
-                            });
+                    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.getToken()).addOnSuccessListener(context, callback::accept).addOnFailureListener(e -> {
+                        Log.e(TAG, "Erreur getCurrentLocation: " + e.getMessage());
+                        callback.accept(null);
+                    });
                 }
             }).addOnFailureListener(e -> {
                 Log.e(TAG, "Erreur getLastLocation: " + e.getMessage());
@@ -153,6 +140,10 @@ public class MapManager implements OnMapReadyCallback {
             Log.e(TAG, "SecurityException getGPSPosition: " + e.getMessage());
             callback.accept(null);
         }
+    }
+
+    public int getMapType() {
+        return context.getSaveManager() != null ? context.getSaveManager().loadMapType() : GoogleMap.MAP_TYPE_NORMAL;
     }
 
     public void initCameraPosition(@Nullable Runnable onAnimationFinished) {
@@ -207,9 +198,8 @@ public class MapManager implements OnMapReadyCallback {
     }
 
     public void saveCurrentPosition() {
-        if (googleMap != null && context.getSaveManager() != null) {
+        if (googleMap != null && context.getSaveManager() != null)
             context.getSaveManager().saveCameraPosition(googleMap.getCameraPosition());
-        }
     }
 
     public void centerOnUserLocation() {
@@ -249,13 +239,20 @@ public class MapManager implements OnMapReadyCallback {
 
     public void animateCamera(@NonNull LatLng target, float zoom, float tilt, float bearing, int durationMs, @Nullable GoogleMap.CancelableCallback callback) {
         if (googleMap == null) return;
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(target)
-                .zoom(zoom)
-                .tilt(tilt)
-                .bearing(bearing)
-                .build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(target).zoom(zoom).tilt(tilt).bearing(bearing).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), durationMs, callback);
+    }
+
+    public void changeMapStyle() {
+        if (googleMap == null) return;
+
+        if (googleMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
+            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            context.getSaveManager().saveMapType(GoogleMap.MAP_TYPE_NORMAL);
+        } else {
+            googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            context.getSaveManager().saveMapType(GoogleMap.MAP_TYPE_HYBRID);
+        }
     }
 
     public void resetToNorth() {
