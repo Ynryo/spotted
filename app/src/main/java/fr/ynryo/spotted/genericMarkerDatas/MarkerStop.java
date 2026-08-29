@@ -213,9 +213,9 @@ public class MarkerStop {
             return "";
         }
         if (delay > 0) {
-            return "Retard " + delay + " min";
+            return "Retard de " + delay + " min";
         } else {
-            return "Avance " + Math.abs(delay) + " min";
+            return "Avance de " + Math.abs(delay) + " min";
         }
     }
 
