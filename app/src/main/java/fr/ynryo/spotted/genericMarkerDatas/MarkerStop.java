@@ -195,14 +195,23 @@ public class MarkerStop {
     }
 
     public String getDelayText() {
-        if (delay == null) {
+        if (delay == null || delay == 0) {
             return "";
         }
 
-        if (delay == 0) {
-            return "À l'heure";
+        if (delay > 0) {
+            Time timeWithoutDelay = Time.calculateTimeWithoutDelay(departureTime, delay);
+            return Time.formatHHmm(timeWithoutDelay);
+        } else {
+            Time timeWithoutAdvance = Time.calculateTimeWithoutAdvance(departureTime, delay);
+            return Time.formatHHmm(timeWithoutAdvance);
         }
+    }
 
+    public String getDelayStatusText() {
+        if (delay == null || isOnTime()) {
+            return "";
+        }
         if (delay > 0) {
             return "Retard " + delay + " min";
         } else {

@@ -20,6 +20,7 @@
         android:orientation="horizontal"
         android:paddingVertical="8dp">
 
+        <!--Voie-->
         <fr.ynryo.spotted.views.SquareLinearLayout
             android:id="@+id/llPlatformContainer"
             android:layout_width="wrap_content"
@@ -50,6 +51,7 @@
                 android:textSize="13sp" />
         </fr.ynryo.spotted.views.SquareLinearLayout>
 
+        <!-- nom de l'arrêt -->
         <TextView
             android:id="@+id/tvStopName"
             android:layout_width="0dp"
@@ -63,177 +65,106 @@
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/llUmTimeContainer"
+        android:id="@+id/llTimeContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical|end"
         android:orientation="horizontal"
         android:paddingVertical="8dp">
 
-        <!-- Conteneur Train A -->
-        <LinearLayout
-                android:id="@+id/llTrainAData"
+        <!-- Conteneur Horaires & Retard -->
+        <ViewFlipper
+            android:id="@+id/llTrainAData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:flipInterval="3000"
+            android:inAnimation="@android:anim/fade_in"
+            android:outAnimation="@android:anim/fade_out">
+
+            <!-- Vue 0 : Horaires (Arrivée, À quai, Départ) -->
+            <LinearLayout
+                android:id="@+id/llTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
                 android:gravity="center_vertical|end"
                 android:orientation="horizontal">
 
-            <LinearLayout
-                    android:id="@+id/llTime"
+                <LinearLayout
+                    android:id="@+id/llTimeDetail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                <LinearLayout
-                        android:id="@+id/llTimeDetail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
+                    android:orientation="vertical">
 
                     <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical|end"
-                            android:orientation="horizontal">
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical|end"
+                        android:orientation="horizontal">
 
                         <TextView
-                                android:id="@+id/tvArrivingTime"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textStyle="bold" />
+                            android:id="@+id/tvArrivingTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold" />
 
                         <ImageView
-                                android:id="@+id/ivArrivingTimeIcon"
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_marginStart="4dp"
-                                android:visibility="gone" />
+                            android:id="@+id/ivArrivingTimeIcon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvScheduledArrivingTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:visibility="gone" />
                     </LinearLayout>
 
                     <TextView
-                            android:id="@+id/tvAtStopTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end" />
+                        android:id="@+id/tvAtStopTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end" />
 
                     <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical|end"
-                            android:orientation="horizontal">
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical|end"
+                        android:orientation="horizontal">
 
                         <TextView
-                                android:id="@+id/tvDepartureTime"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textStyle="bold" />
+                            android:id="@+id/tvDepartureTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold" />
 
                         <ImageView
-                                android:id="@+id/ivDepartureTimeIcon"
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_marginStart="4dp"
-                                android:visibility="gone" />
+                            android:id="@+id/ivDepartureTimeIcon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvScheduledDepartureTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:visibility="gone" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Vue 1 : Retard -->
             <TextView
-                    android:id="@+id/tvDelay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:visibility="gone" />
-        </LinearLayout>
-
-        <!-- Séparateur vertical -->
-        <View
-                android:id="@+id/vSplitSeparator"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="8dp"
-                android:background="#CCCCCC"
-                android:visibility="gone" />
-
-        <!-- Conteneur Train B -->
-        <LinearLayout
-                android:id="@+id/llTrainBData"
+                android:id="@+id/tvDelay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical|end"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-            <LinearLayout
-                    android:id="@+id/llTimeB"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                <LinearLayout
-                        android:id="@+id/llTimeDetailB"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                    <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical|end"
-                            android:orientation="horizontal">
-
-                        <TextView
-                                android:id="@+id/tvArrivingTimeB"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textStyle="bold" />
-
-                        <ImageView
-                                android:id="@+id/ivArrivingTimeIconB"
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_marginStart="4dp"
-                                android:visibility="gone" />
-                    </LinearLayout>
-
-                    <TextView
-                            android:id="@+id/tvAtStopTimeB"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end" />
-
-                    <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical|end"
-                            android:orientation="horizontal">
-
-                        <TextView
-                                android:id="@+id/tvDepartureTimeB"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textStyle="bold" />
-
-                        <ImageView
-                                android:id="@+id/ivDepartureTimeIconB"
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_marginStart="4dp"
-                                android:visibility="gone" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                    android:id="@+id/tvDelayB"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:visibility="gone" />
-        </LinearLayout>
+                android:layout_gravity="center_vertical|end"
+                android:gravity="center_vertical|end" />
+        </ViewFlipper>
     </LinearLayout>
 </LinearLayout>

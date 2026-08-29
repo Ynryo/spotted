@@ -126,6 +126,18 @@ public class Time implements Comparable<Time> {
         return minutesBetween(aimedTime, expectedTime);
     }
 
+    @Nullable
+    public static Time calculateTimeWithoutDelay(@NonNull Time expectedTime, @NonNull Long delayMinutes) {
+        if (delayMinutes < 0) return null;
+        return new Time(expectedTime.localTime.minusMinutes(delayMinutes));
+    }
+
+    @Nullable
+    public static Time calculateTimeWithoutAdvance(@NonNull Time expectedTime, @NonNull Long advanceMinutes) {
+        if (advanceMinutes > 0) return null;
+        return new Time(expectedTime.localTime.plusMinutes(advanceMinutes));
+    }
+
     /**
      * Calcule le retard en minutes entre les chaînes d'horaires théoriques et estimées.
      *
