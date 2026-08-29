@@ -56,7 +56,6 @@ public class MarkerStopsDetailActivity {
     private final MainActivity context;
     private View bottomSheetView;
     private BottomSheetBehavior<View> behavior;
-    private String vehicleId;
 
     public MarkerStopsDetailActivity(MainActivity context) {
         WeakReference<MainActivity> contextRef = new WeakReference<>(context);
@@ -79,7 +78,6 @@ public class MarkerStopsDetailActivity {
                 @Override
                 public void onStateChanged(@NonNull View bottomSheet, int newState) {
                     if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        vehicleId = null;
                         if (context != null && context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
                             context.getMarkerArtist().getRouteArtist().remove();
                         }
@@ -115,8 +113,6 @@ public class MarkerStopsDetailActivity {
         if (bottomSheetView == null || behavior == null) initBottomSheet();
         if (bottomSheetView == null || behavior == null) return;
 
-        vehicleId = markerStandardized.getId();
-
         setupLineHeader(bottomSheetView, markerStandardized);
         setupLoader(bottomSheetView, markerStandardized);
 
@@ -139,7 +135,6 @@ public class MarkerStopsDetailActivity {
             context.findViewById(R.id.fab_center_location).setVisibility(View.VISIBLE);
             context.findViewById(R.id.changeMapStyle).setVisibility(View.VISIBLE);
         }
-        vehicleId = null;
 
         MarkerArtist markerArtist = context.getMarkerArtist();
         if (markerArtist != null && markerArtist.getRouteArtist() != null) {
@@ -348,10 +343,6 @@ public class MarkerStopsDetailActivity {
                 }
             });
         }
-    }
-
-    public String getCurrentVehicleId() {
-        return vehicleId;
     }
 
     private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
