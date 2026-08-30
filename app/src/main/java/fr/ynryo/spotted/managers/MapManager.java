@@ -239,8 +239,14 @@ public class MapManager implements OnMapReadyCallback {
 
     public void animateCamera(@NonNull LatLng target, float zoom, float tilt, float bearing, int durationMs, @Nullable GoogleMap.CancelableCallback callback) {
         if (googleMap == null) return;
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(target).zoom(zoom).tilt(tilt).bearing(bearing).build();
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), durationMs, callback);
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                        .target(target)
+                        .bearing(bearing)
+                        .tilt(tilt)
+                        .zoom(zoom)
+                        .build()
+        ), durationMs, callback);
     }
 
     public void changeMapStyle() {

@@ -128,7 +128,7 @@ public class MarkerArtist {
             if (activeMarkers.containsKey(id)) {
                 Marker existingMarker = activeMarkers.get(id);
                 if (existingMarker != null) {
-                    animateMarker(existingMarker, position, followManager.isFollowing(id));
+                    animateMarker(existingMarker, fetchedMarkerStandardized, position, followManager.isFollowing(id));
 
                     MarkerStandardized oldData = (MarkerStandardized) existingMarker.getTag();
                     if (oldData == null || !Objects.equals(oldData.getFillColor(), fetchedMarkerStandardized.getFillColor()) || !Objects.equals(oldData.getLineId(), fetchedMarkerStandardized.getLineId()) || Math.abs(oldData.getBearing() - fetchedMarkerStandardized.getBearing()) > 5) {
@@ -298,9 +298,9 @@ public class MarkerArtist {
         }
     }
 
-    public void animateMarker(final Marker marker, final LatLng toPosition, boolean shouldFollow) {
+    public void animateMarker(final Marker marker, final MarkerStandardized newData, final LatLng toPosition, boolean shouldFollow) {
         final LatLng startPosition = marker.getPosition();
-        String markerId = marker.getTag() != null ? ((MarkerStandardized) marker.getTag()).getId() : "";
+        String markerId = newData != null ? newData.getId() : (marker.getTag() != null ? ((MarkerStandardized) marker.getTag()).getId() : "");
 
         ValueAnimator existing = activeAnimators.get(markerId);
         if (existing != null && existing.isRunning()) {
@@ -308,8 +308,7 @@ public class MarkerArtist {
         }
 
         if (shouldFollow && googleMap != null) {
-            MarkerStandardized data = (MarkerStandardized) marker.getTag();
-            float bearing = data != null ? data.getBearing() : 0f;
+            float bearing = newData != null ? newData.getBearing() : (marker.getTag() != null ? ((MarkerStandardized) marker.getTag()).getBearing() : 0f);
 
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(toPosition).bearing(bearing).tilt(75f).zoom(17f).build()), 2000, null);
         }
