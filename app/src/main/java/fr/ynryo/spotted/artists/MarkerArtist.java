@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
@@ -101,7 +102,7 @@ public class MarkerArtist {
                 marker.remove(); //remove map
                 iterator.remove(); //remove list of active markers
                 activeAnimators.remove(id); //remove animator
-                if (id.equals(followManager.getFollowedMarkerId()) || id.equals(routeArtist.getCurrentMarkerId()) || id.equals(markerStopsDetailActivity.getCurrentVehicleId()))
+                if (id.equals(followManager.getFollowedMarkerId()) || id.equals(routeArtist.getCurrentMarkerId()))
                     checkVehicleAliveAndCleanup(id);
             }
         }
@@ -137,11 +138,7 @@ public class MarkerArtist {
                     existingMarker.setTag(fetchedMarkerStandardized);
                 }
             } else {
-                Marker newMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(position)
-                        .icon(createMarkerBitmapDescriptor(fetchedMarkerStandardized, mapRotation, followManager.isFollowing(id)))
-                        .anchor(0.5f, 0.3f)
-                        .zIndex(4f));
+                Marker newMarker = googleMap.addMarker(new MarkerOptions().position(position).icon(createMarkerBitmapDescriptor(fetchedMarkerStandardized, mapRotation, followManager.isFollowing(id))).anchor(0.5f, 0.3f).zIndex(4f));
 
                 if (newMarker != null) {
                     newMarker.setTag(fetchedMarkerStandardized);
@@ -160,14 +157,12 @@ public class MarkerArtist {
                     if (id.equals(followManager.getFollowedMarkerId()))
                         followManager.disableFollow(false);
                     if (id.equals(routeArtist.getCurrentMarkerId())) routeArtist.remove();
-                    if (id.equals(markerStopsDetailActivity.getCurrentVehicleId()))
-                        markerStopsDetailActivity.close();
                 }
             }
 
             @Override
             public void onErrorVehicleAliveListener(String error) {
-                //if error
+                Log.e(TAG, "Erreur lors de la requête pour savoir si le marker " + id + " est toujours en vie :" + error);
             }
         });
     }
@@ -260,11 +255,7 @@ public class MarkerArtist {
 
 
     public BitmapDescriptor createMarkerBitmapDescriptor(MarkerStandardized markerStandardized, float mapRotation, boolean shouldFollow) {
-        String cacheKey = (markerStandardized.isUm() ? "UM_" : "US_")
-                + markerStandardized.getFillColor() + "_"
-                + markerStandardized.getLineId() + "_"
-                + (int) (markerStandardized.getBearing() - mapRotation) + "_"
-                + markerStandardized.getId();
+        String cacheKey = (markerStandardized.isUm() ? "UM_" : "US_") + markerStandardized.getFillColor() + "_" + markerStandardized.getLineId() + "_" + (int) (markerStandardized.getBearing() - mapRotation) + "_" + markerStandardized.getId();
 //        Log.d(TAG, "cacheKey=" + cacheKey + " isUm=" + markerStandardized.isUm() + " cacheHit=" + markerIconCache.containsKey(cacheKey));
 
         if (markerIconCache.containsKey(cacheKey)) {

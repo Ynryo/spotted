@@ -74,7 +74,7 @@ public class MapManager implements OnMapReadyCallback {
     private void configureMap() {
         if (googleMap == null) return;
 
-        googleMap.setMapType(getMapType());
+        googleMap.setMapType(this.getMapType());
         googleMap.setBuildingsEnabled(true);
 
         CameraPosition savedPosition = context.getSaveManager() != null ? context.getSaveManager().loadCameraPosition() : null;
