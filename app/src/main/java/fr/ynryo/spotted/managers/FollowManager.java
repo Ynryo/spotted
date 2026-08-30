@@ -37,7 +37,7 @@ public class FollowManager {
             isFollowing = true;
             this.followedMarkerId = followedMarkerId;
             centerOnFollowed();
-            followButton.setImageResource(R.drawable.icon_distance_fill);
+            followButton.setImageResource(R.drawable.icon_follow_enable);
         }
     }
 
@@ -45,7 +45,7 @@ public class FollowManager {
         if (isFollowing) {
             isFollowing = false;
             if (followButton != null) {
-                followButton.setImageResource(R.drawable.icon_distance);
+                followButton.setImageResource(R.drawable.icon_follow_disabled);
             }
 
             if (!isGesture && context.getMap() != null) {
@@ -79,7 +79,8 @@ public class FollowManager {
     public void setFollowButton(FloatingActionButton followButton, String followedMarkerId) {
         this.followButton = followButton;
         if (this.followButton == null) return;
-        if (isFollowing(followedMarkerId)) this.followButton.setImageResource(R.drawable.icon_distance_fill);
+        if (isFollowing(followedMarkerId))
+            this.followButton.setImageResource(R.drawable.icon_follow_enable);
         this.followButton.setOnClickListener(view -> toggleFollow(followedMarkerId));
     }
 }

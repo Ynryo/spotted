@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:contentDescription="@string/follow_button_desc"
-        android:src="@drawable/icon_distance"
+        android:src="@drawable/icon_follow_disabled"
         app:backgroundTint="?attr/colorSurface"
         app:fabCustomSize="40dp"
         app:layout_constraintEnd_toStartOf="@+id/favoriteButton"
