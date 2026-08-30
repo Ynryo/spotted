@@ -658,6 +658,7 @@ public class MarkerStopsDetailActivity {
                 ivTimeIcon.setColorFilter(COLOR_GREEN);
             } else {
                 ivTimeIcon.setImageResource(R.drawable.icon_no_sensors);
+                ivTimeIcon.setColorFilter(Color.WHITE);
             }
         }
 
