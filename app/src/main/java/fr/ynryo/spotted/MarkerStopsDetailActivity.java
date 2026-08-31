@@ -676,9 +676,7 @@ public class MarkerStopsDetailActivity {
             vh.tvDelay.setText(stop.getDelayStatusText());
             vh.tvDelay.setPaintFlags(vh.tvDelay.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             vh.tvDelay.setTextColor(stop.getDelayColor());
-            if (vh.vfTime != null) {
-                vh.vfTime.startFlipping();
-            }
+            if (vh.vfTime != null) vh.vfTime.startFlipping();
         }
 
         private int getDefaultTextColor(StopViewHolder vh) {

@@ -123,7 +123,8 @@ public class MarkerStandardized {
         this.markerTrip.setAtStop(busTrackerVehicleDetails.getPosition().isAtStop());
         this.markerTrip.setDistanceTraveled(busTrackerVehicleDetails.getPosition().getDistanceTraveled());
 
-        if (busTrackerVehicleDetails.getCalls().isEmpty()) return;
+        if (busTrackerVehicleDetails.getCalls() == null || busTrackerVehicleDetails.getCalls().isEmpty())
+            return;
         this.markerTrip.getStops().clear();
 
         for (int i = 0; i < busTrackerVehicleDetails.getCalls().size(); i++) { //calls = stops
@@ -157,10 +158,14 @@ public class MarkerStandardized {
 
             stop.setOnLive(isRealtime);
 
-            if (busTrackerVehicleStopDetails.getFlags().contains("NO_PICKUP")) {
-                stop.setStopType(StopType.NO_PICKUP);
-            } else if (busTrackerVehicleStopDetails.getFlags().contains("NO_DROPOFF")) {
-                stop.setStopType(StopType.NO_DROPOFF);
+            if (busTrackerVehicleStopDetails.getFlags() != null) {
+                if (busTrackerVehicleStopDetails.getFlags().contains("NO_PICKUP")) {
+                    stop.setStopType(StopType.NO_PICKUP);
+                } else if (busTrackerVehicleStopDetails.getFlags().contains("NO_DROPOFF")) {
+                    stop.setStopType(StopType.NO_DROPOFF);
+                } else {
+                    stop.setStopType(StopType.BOTH);
+                }
             } else {
                 stop.setStopType(StopType.BOTH);
             }
@@ -173,7 +178,7 @@ public class MarkerStandardized {
     }
 
     public void setGuessStopPlatform(@NonNull String uicCode, @NonNull List<CartoTchooGuessPlatform> guessPlatforms) {
-        if (guessPlatforms.isEmpty()) return;
+        if (guessPlatforms == null || guessPlatforms.isEmpty()) return;
 
         // CartoTchooGuessPlatform bestGuessPlatform = guessPlatforms.get(0);
         CartoTchooGuessPlatform bestGuessPlatform = Collections.max(guessPlatforms, Comparator.comparingDouble(CartoTchooGuessPlatform::getPercentage));

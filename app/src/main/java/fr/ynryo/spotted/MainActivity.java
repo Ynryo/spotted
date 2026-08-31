@@ -266,21 +266,15 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
     }
 
     public void centerOnUserLocation() {
-        if (mapManager != null) {
-            mapManager.centerOnUserLocation();
-        }
+        if (mapManager != null) mapManager.centerOnUserLocation();
     }
 
     public void centerOnMarker(@NonNull String markerId, boolean isTilted, boolean isRotated) {
-        if (mapManager != null) {
-            mapManager.centerOnMarker(markerId, isTilted, isRotated);
-        }
+        if (mapManager != null) mapManager.centerOnMarker(markerId, isTilted, isRotated);
     }
 
     public void centerOnMarker(@NonNull MarkerStandardized markerStandardized, boolean isTilted, boolean isRotated) {
-        if (mapManager != null) {
-            mapManager.centerOnMarker(markerStandardized, isTilted, isRotated);
-        }
+        if (mapManager != null) mapManager.centerOnMarker(markerStandardized, isTilted, isRotated);
     }
 
     private void fetchMarkers() {
