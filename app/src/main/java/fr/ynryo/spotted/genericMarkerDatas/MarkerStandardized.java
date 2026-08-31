@@ -250,6 +250,9 @@ public class MarkerStandardized {
     }
 
     public List<MarkerStop> getStops() {
+        if (isUm() && umA != null && (markerTrip.getStops() == null || markerTrip.getStops().isEmpty())) {
+            return umA.getStops();
+        }
         return markerTrip.getStops() != null ? markerTrip.getStops() : new ArrayList<>();
     }
 
@@ -274,6 +277,9 @@ public class MarkerStandardized {
     }
 
     public String getPathRef() {
+        if (isUm() && umA != null && (markerTrip.getPathRef() == null || markerTrip.getPathRef().isEmpty())) {
+            return umA.getPathRef();
+        }
         return markerTrip.getPathRef();
     }
 
@@ -424,6 +430,10 @@ public class MarkerStandardized {
     public void setStops(List<MarkerStop> stops) {
         this.markerTrip.setStops(stops);
         this.detailsLoaded = (stops != null && !stops.isEmpty());
+    }
+
+    public void setPathRef(String pathRef) {
+        this.markerTrip.setPathRef(pathRef);
     }
 
     /**

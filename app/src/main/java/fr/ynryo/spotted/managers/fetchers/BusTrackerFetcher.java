@@ -127,6 +127,13 @@ public class BusTrackerFetcher {
                         responsesReceived++;
                         if (responsesReceived == 2) {
                             TrainUmAssembler.assembleUmStops(markerStandardized);
+                            if (markerStandardized.getUmA() != null) {
+                                if (markerStandardized.getUmA().getStops() != null) {
+                                    markerStandardized.setStops(markerStandardized.getUmA().getStops());
+                                }
+                                markerStandardized.setPathRef(markerStandardized.getUmA().getPathRef());
+                                markerStandardized.setDestination(TrainUmAssembler.getDestination(markerStandardized));
+                            }
                             if (listener == null) return;
                             listener.onResponseVehicleDetailsListener(markerStandardized);
                         }

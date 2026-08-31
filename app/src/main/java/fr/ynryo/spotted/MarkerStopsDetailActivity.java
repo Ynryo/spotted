@@ -311,6 +311,9 @@ public class MarkerStopsDetailActivity {
         if (!markerStandardized.isTrain()) return;
 
         String trainNum = markerStandardized.getLineNumber();
+        if (markerStandardized.isUm() && markerStandardized.getUmA() != null) {
+            trainNum = markerStandardized.getUmA().getLineNumber();
+        }
         if (trainNum == null || trainNum.isEmpty()) return;
 
         List<MarkerStop> stops = markerStandardized.getStops();
