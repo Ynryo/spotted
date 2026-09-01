@@ -1,4 +1,4 @@
-# **Où est ce fdp de tram ? 🚋💨**
+# **Spotted**
 
 Une application Android moderne et réactive pour suivre en temps réel les trams et bus de France. Fini de poireauter à l'arrêt sans savoir si ton tram est déjà passé ou s'il est bloqué !
 
