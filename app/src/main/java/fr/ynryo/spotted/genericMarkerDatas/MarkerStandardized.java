@@ -53,15 +53,13 @@ public class MarkerStandardized {
         this.detailsLoaded = false;
     }
 
-    // ==================== CONVERSION ====================
-
+    // ==================== CONVERSION & FACTORY ====================
     /**
      * Converts a {@link BusTrackerMarkerData} object into a {@link MarkerStandardized} object with the specified {@link MarkerType}.
      *
      * @param busTrackerMarkerData the source {@link BusTrackerMarkerData} object containing the data to be converted
      * @param type                 the {@link MarkerType} to be associated with the resulting {@link MarkerStandardized} object
-     * @return a {@link MarkerStandardized} object populated with the data from the given {@link BusTrackerMarkerData} and the specified {@link MarkerType
-     * }
+     * @return a {@link MarkerStandardized} object populated with the data from the given {@link BusTrackerMarkerData} and the specified {@link MarkerType}
      */
     public static MarkerStandardized createNewMarkerFrom(@NonNull BusTrackerMarkerData busTrackerMarkerData, @NonNull MarkerType type) {
         MarkerStandardized marker = new MarkerStandardized();
@@ -103,7 +101,8 @@ public class MarkerStandardized {
         return marker;
     }
 
-    // à la priorité sur les datas (bus tracker api)
+    // ==================== HYDRATATION DES DONNÉES ====================
+
     /**
      * Met à jour les détails de l'instance du véhicule actuel à l'aide de l'objet {@code BusTrackerVehicleDetails} fourni.
      * Remplit divers champs tels que l'identifiant de la ligne, la destination, l'identifiant du réseau, la référence de parcours, les arrêts,
@@ -111,9 +110,6 @@ public class MarkerStandardized {
      *
      * @param busTrackerVehicleDetails Un objet {@link BusTrackerVehicleDetails} non nul contenant les détails tels que l'identifiant de ligne,
      *                                 la destination, l'identifiant réseau, la référence de parcours et la liste des arrêts du véhicule.
-     *                                 Chaque arrêt peut contenir des informations sur la référence d'arrêt, le nom de l'arrêt, le nom du quai,
-     *                                 les horaires théoriques et prévus, l'ordre de l'arrêt, les coordonnées, la distance parcourue,
-     *                                 les indicateurs (ex. : NO_PICKUP, NO_DROPOFF) et d'autres métadonnées associées.
      */
     public void setVehicleDetails(@NonNull BusTrackerVehicleDetails busTrackerVehicleDetails) {
         this.markerIdentity.setLineId(busTrackerVehicleDetails.getLineId());
@@ -180,7 +176,6 @@ public class MarkerStandardized {
     public void setGuessStopPlatform(@NonNull String uicCode, @NonNull List<CartoTchooGuessPlatform> guessPlatforms) {
         if (guessPlatforms == null || guessPlatforms.isEmpty()) return;
 
-        // CartoTchooGuessPlatform bestGuessPlatform = guessPlatforms.get(0);
         CartoTchooGuessPlatform bestGuessPlatform = Collections.max(guessPlatforms, Comparator.comparingDouble(CartoTchooGuessPlatform::getPercentage));
         for (MarkerStop markerStop : this.markerTrip.getStops()) {
             if (uicCode.equals(markerStop.getStopRef())) {
@@ -201,6 +196,7 @@ public class MarkerStandardized {
     }
 
     // ==================== GETTERS ====================
+    // --- Identité ---
     public MarkerType getMarkerType() {
         return markerIdentity.getMarkerType();
     }
@@ -225,6 +221,7 @@ public class MarkerStandardized {
         return markerIdentity.getNetworkId();
     }
 
+    // --- Style ---
     public String getFillColor() {
         return markerStyle.getFillColor();
     }
@@ -233,6 +230,7 @@ public class MarkerStandardized {
         return markerStyle.getTextColor();
     }
 
+    // --- Position et orientation ---
     public double getLatitude() {
         return markerPosition.getLatitude();
     }
@@ -245,8 +243,16 @@ public class MarkerStandardized {
         return markerPosition.getBearing();
     }
 
+    // --- Voyage et arrêts ---
     public String getDestination() {
         return markerTrip.getDestination();
+    }
+
+    public String getPathRef() {
+        if (isUm() && umA != null && (markerTrip.getPathRef() == null || markerTrip.getPathRef().isEmpty())) {
+            return umA.getPathRef();
+        }
+        return markerTrip.getPathRef();
     }
 
     public List<MarkerStop> getStops() {
@@ -254,6 +260,20 @@ public class MarkerStandardized {
             return umA.getStops();
         }
         return markerTrip.getStops() != null ? markerTrip.getStops() : new ArrayList<>();
+    }
+
+    @Nullable
+    public MarkerStop getNextStop() {
+        List<MarkerStop> stops = getStops();
+        if (stops != null && !stops.isEmpty()) {
+            return stops.get(0);
+        }
+        return null;
+    }
+
+    public int getRemainingStopsCount() {
+        List<MarkerStop> stops = getStops();
+        return stops != null ? stops.size() : 0;
     }
 
     public boolean isAtStop() {
@@ -264,8 +284,17 @@ public class MarkerStandardized {
         return markerTrip.getDistanceTraveled();
     }
 
+    public Object getMarkerDataRoute() {
+        return markerTrip.getMarkerDataRoute();
+    }
+
+    // --- Métadonnées et statut ---
     public boolean isFollowed() {
         return isFollowed;
+    }
+
+    public boolean isDetailsLoaded() {
+        return detailsLoaded;
     }
 
     public Time getCreatedAt() {
@@ -276,21 +305,7 @@ public class MarkerStandardized {
         return lastUpdatedAt;
     }
 
-    public String getPathRef() {
-        if (isUm() && umA != null && (markerTrip.getPathRef() == null || markerTrip.getPathRef().isEmpty())) {
-            return umA.getPathRef();
-        }
-        return markerTrip.getPathRef();
-    }
-
-    public Object getMarkerDataRoute() {
-        return markerTrip.getMarkerDataRoute();
-    }
-
-    public boolean isDetailsLoaded() {
-        return detailsLoaded;
-    }
-
+    // --- Unité Multiple (UM) ---
     public MarkerStandardized getUmA() {
         return umA;
     }
@@ -300,7 +315,7 @@ public class MarkerStandardized {
     }
 
     // ==================== SETTERS ====================
-
+    // --- Identité ---
     /**
      * Sets the marker type for the current instance.
      *
@@ -355,6 +370,7 @@ public class MarkerStandardized {
         this.markerIdentity.setNetworkId(networkId);
     }
 
+    // --- Style ---
     /**
      * Sets the fill color for the object.
      *
@@ -373,12 +389,11 @@ public class MarkerStandardized {
         this.markerStyle.setTextColor(textColor);
     }
 
+    // --- Position et orientation ---
     /**
      * Updates the latitude for the marker and records the current timestamp.
      *
-     * @param latitude The new latitude value to set. It is expected to follow the standard
-     *                 geographic coordinate system, where valid values range between -90.0
-     *                 and 90.0.
+     * @param latitude The new latitude value to set.
      */
     public void setLatitude(double latitude) {
         this.markerPosition.setLatitude(latitude);
@@ -388,9 +403,7 @@ public class MarkerStandardized {
     /**
      * Updates the longitude for the marker and records the current timestamp.
      *
-     * @param longitude The new longitude value to set. It is expected to follow the standard
-     *                  geographic coordinate system, where valid values range
-     *                  between -180.0 and 180.0.
+     * @param longitude The new longitude value to set.
      */
     public void setLongitude(double longitude) {
         this.markerPosition.setLongitude(longitude);
@@ -400,9 +413,7 @@ public class MarkerStandardized {
     /**
      * Sets the bearing of the marker and updates the timestamp of the last modification.
      *
-     * @param bearing The new bearing value to set. It represents the direction or angle
-     *                the marker is facing, specified in degrees. Valid values typically
-     *                range from 0.0 to 360.0, where 0.0 points to the north.
+     * @param bearing The new bearing value to set in degrees.
      */
     public void setBearing(float bearing) {
         this.markerPosition.setBearing(bearing);
@@ -410,26 +421,27 @@ public class MarkerStandardized {
     }
 
     /**
+     * Updates the position of an object with new latitude, longitude, and bearing values.
+     *
+     * @param newLatitude  the updated latitude value
+     * @param newLongitude the updated longitude value
+     * @param newBearing   the updated bearing value in degrees
+     */
+    public void updatePosition(double newLatitude, double newLongitude, float newBearing) {
+        this.markerPosition.setLatitude(newLatitude);
+        this.markerPosition.setLongitude(newLongitude);
+        this.markerPosition.setBearing(newBearing);
+        this.lastUpdatedAt = Time.now();
+    }
+
+    // --- Voyage et arrêts ---
+    /**
      * Sets the destination for the marker.
      *
-     * @param destination The name of the destination. It represents the final
-     *                    endpoint or target location associated with the marker.
+     * @param destination The name of the destination.
      */
     public void setDestination(String destination) {
         this.markerTrip.setDestination(destination);
-    }
-
-    /**
-     * Sets the list of stops associated with the marker and updates the detailsLoaded flag
-     * based on the presence of valid stop data.
-     *
-     * @param stops The list of stops to associate with the marker. Each stop is represented
-     *              by a MarkerStop object. Passing a null or empty list will mark the
-     *              details as not loaded.
-     */
-    public void setStops(List<MarkerStop> stops) {
-        this.markerTrip.setStops(stops);
-        this.detailsLoaded = (stops != null && !stops.isEmpty());
     }
 
     public void setPathRef(String pathRef) {
@@ -437,11 +449,30 @@ public class MarkerStandardized {
     }
 
     /**
+     * Sets the list of stops associated with the marker and updates the detailsLoaded flag
+     * based on the presence of valid stop data.
+     *
+     * @param stops The list of stops to associate with the marker.
+     */
+    public void setStops(List<MarkerStop> stops) {
+        this.markerTrip.setStops(stops);
+        this.detailsLoaded = (stops != null && !stops.isEmpty());
+    }
+
+    /**
+     * Sets the marker data route associated with the marker.
+     *
+     * @param markerDataRoute The data route object to associate with the marker.
+     */
+    public void setMarkerDataRoute(Object markerDataRoute) {
+        this.markerTrip.setMarkerDataRoute(markerDataRoute);
+    }
+
+    // --- Métadonnées et statut ---
+    /**
      * Updates the followed status of the marker.
      *
-     * @param followed The new followed status to set. A value of true indicates
-     *                 that the marker is marked as followed, while false indicates
-     *                 it is not followed.
+     * @param followed The new followed status to set.
      */
     public void setFollowed(boolean followed) {
         isFollowed = followed;
@@ -451,7 +482,6 @@ public class MarkerStandardized {
      * Sets the creation timestamp for the marker data.
      *
      * @param createdAt The timestamp indicating when the marker data was created.
-     *                  It is represented as an Instant object and should not be null.
      */
     public void setCreatedAt(Time createdAt) {
         this.createdAt = createdAt;
@@ -460,41 +490,26 @@ public class MarkerStandardized {
     /**
      * Updates the timestamp indicating the last modification time for the marker data.
      *
-     * @param lastUpdatedAt The timestamp of the last update. It is represented
-     *                      as an Instant object and should not be null.
+     * @param lastUpdatedAt The timestamp of the last update.
      */
     public void setLastUpdatedAt(Time lastUpdatedAt) {
         this.lastUpdatedAt = lastUpdatedAt;
     }
 
     /**
-     * Sets the detailsLoaded flag, indicating whether additional details
-     * for the marker data have been successfully loaded.
+     * Sets the detailsLoaded flag.
      *
      * @param detailsLoaded A boolean value representing the loaded status.
-     *                      A value of true indicates that details are loaded,
-     *                      while false indicates they are not loaded.
      */
     public void setDetailsLoaded(boolean detailsLoaded) {
         this.detailsLoaded = detailsLoaded;
     }
 
-    /**
-     * Sets the marker data route associated with the marker.
-     *
-     * @param markerDataRoute The data route object to associate with the marker.
-     *                        It represents additional information regarding the
-     *                        route or path that the marker is linked to.
-     */
-    public void setMarkerDataRoute(Object markerDataRoute) {
-        this.markerTrip.setMarkerDataRoute(markerDataRoute);
-    }
-
+    // --- Unité Multiple (UM) ---
     /**
      * Sets the first unit of a standardized marker forming a multiple-unit train (UM - Unité Multiple).
      *
-     * @param umA The first unit of the train. It is represented as a MarkerStandardized object
-     *            and encapsulates standardized data associated with the unit.
+     * @param umA The first unit of the train as a MarkerStandardized object.
      */
     public void setUmA(MarkerStandardized umA) {
         this.umA = umA;
@@ -503,8 +518,7 @@ public class MarkerStandardized {
     /**
      * Sets the second unit of a standardized marker forming a multiple-unit train (UM - Unité Multiple).
      *
-     * @param umB The second unit of the train. It is represented as a MarkerStandardized object
-     *            and encapsulates standardized data associated with the unit.
+     * @param umB The second unit of the train as a MarkerStandardized object.
      */
     public void setUmB(MarkerStandardized umB) {
         this.umB = umB;
@@ -513,18 +527,15 @@ public class MarkerStandardized {
     /**
      * Sets a pair of standardized marker units forming a multiple-unit train (UM - Unité Multiple).
      *
-     * @param umA The first unit of the train. It is represented as a MarkerStandardized object
-     *            and encapsulates standardized data associated with the unit.
-     * @param umB The second unit of the train. It is represented as a MarkerStandardized object
-     *            and encapsulates standardized data associated with the unit.
+     * @param umA The first unit of the train.
+     * @param umB The second unit of the train.
      */
     public void setUmPair(MarkerStandardized umA, MarkerStandardized umB) {
         this.setUmA(umA);
         this.setUmB(umB);
     }
 
-    // ==================== MÉTHODES UTILITAIRES ====================
-
+    // ==================== MÉTHODES D'ÉTAT & UTILITAIRES ====================
     /**
      * Determines whether the current marker represents a train.
      *
@@ -552,45 +563,6 @@ public class MarkerStandardized {
      */
     public boolean isUm() {
         return isTrain() && umA != null && umB != null;
-    }
-
-    /**
-     * Retrieves the next stop in the list of stops, if available.
-     *
-     * @return the next stop as a {@code MarkerStop} object if the stops list is not null or empty;
-     * otherwise, returns {@code null}.
-     */
-    @Nullable
-    public MarkerStop getNextStop() {
-        List<MarkerStop> stops = getStops();
-        if (stops != null && !stops.isEmpty()) {
-            return stops.get(0);
-        }
-        return null;
-    }
-
-    /**
-     * Calculates and returns the number of remaining stops.
-     *
-     * @return the count of remaining stops, or 0 if the stops list is null.
-     */
-    public int getRemainingStopsCount() {
-        List<MarkerStop> stops = getStops();
-        return stops != null ? stops.size() : 0;
-    }
-
-    /**
-     * Updates the position of an object with new latitude, longitude, and bearing values.
-     *
-     * @param newLatitude  the updated latitude value
-     * @param newLongitude the updated longitude value
-     * @param newBearing   the updated bearing value in degrees
-     */
-    public void updatePosition(double newLatitude, double newLongitude, float newBearing) {
-        this.markerPosition.setLatitude(newLatitude);
-        this.markerPosition.setLongitude(newLongitude);
-        this.markerPosition.setBearing(newBearing);
-        this.lastUpdatedAt = Time.now();
     }
 
     @NonNull
