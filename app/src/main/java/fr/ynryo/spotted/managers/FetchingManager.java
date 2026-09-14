@@ -11,6 +11,7 @@ import fr.ynryo.spotted.apiResponsesPOJO.region.BusTrackerRegionData;
 import fr.ynryo.spotted.apiResponsesPOJO.version.YnryoVersionResponse;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.managers.fetchers.BusTrackerFetcher;
+import fr.ynryo.spotted.managers.fetchers.SpottedFetcher;
 import fr.ynryo.spotted.managers.fetchers.TchooFetcher;
 import fr.ynryo.spotted.managers.fetchers.YnryoFetcher;
 
@@ -22,12 +23,14 @@ import fr.ynryo.spotted.managers.fetchers.YnryoFetcher;
 public class FetchingManager {
     private static final String TAG = "FetchingManager";
     private final MainActivity context;
+    private final SpottedFetcher spottedFetcher;
     private final BusTrackerFetcher busTrackerFetcher;
     private final TchooFetcher tchooFetcher;
     private final YnryoFetcher ynryoFetcher;
 
     public FetchingManager(MainActivity context) {
         this.context = context;
+        this.spottedFetcher = new SpottedFetcher();
         this.busTrackerFetcher = new BusTrackerFetcher();
         this.tchooFetcher = new TchooFetcher();
         this.ynryoFetcher = new YnryoFetcher();
@@ -96,7 +99,7 @@ public class FetchingManager {
     public void fetchMarkers(String lineId, OnMarkersListener listener) {
         if (context.getMap() == null) return;
         LatLngBounds bounds = context.getMap().getProjection().getVisibleRegion().latLngBounds;
-        busTrackerFetcher.fetchMarkers(bounds, lineId, listener);
+        spottedFetcher.fetchMarkers(bounds, listener);
     }
 
     // ==================== FETCH VEHICLE DETAILS ====================
