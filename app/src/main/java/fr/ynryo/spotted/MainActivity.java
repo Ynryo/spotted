@@ -24,8 +24,8 @@ import com.google.android.gms.maps.model.Marker;
 
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
-import fr.ynryo.spotted.apiResponsesPOJO.region.BusTrackerRegionData;
+import fr.ynryo.spotted.apiResponsesPOJO.network.SpottedNetworkData;
+import fr.ynryo.spotted.apiResponsesPOJO.region.SpottedRegionData;
 import fr.ynryo.spotted.apiResponsesPOJO.version.YnryoVersionResponse;
 import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
@@ -65,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
 
     private boolean isMapReady = false;
     private boolean isDataReady = false;
-    private List<BusTrackerRegionData> pendingRegions;
-    private List<BusTrackerNetworkData> pendingNetworks;
+    private List<SpottedRegionData> pendingRegions;
+    private List<SpottedNetworkData> pendingNetworks;
 
     private boolean isFetching = false;
     private GoogleMap googleMap;
@@ -132,10 +132,10 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
 
         fetcher.fetchRegions(new FetchingManager.OnRegionsListener() {
             @Override
-            public void onResponseRegionsListener(List<BusTrackerRegionData> regions) {
+            public void onResponseRegionsListener(List<SpottedRegionData> regions) {
                 fetcher.fetchNetworks(new FetchingManager.OnNetworkListener() {
                     @Override
-                    public void onResponseNetworkListener(List<BusTrackerNetworkData> data) {
+                    public void onResponseNetworkListener(List<SpottedNetworkData> data) {
                         pendingRegions = regions;
                         pendingNetworks = data;
                         isDataReady = true;

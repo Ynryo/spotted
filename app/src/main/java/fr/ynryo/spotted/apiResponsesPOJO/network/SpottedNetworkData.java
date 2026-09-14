@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.net.URI;
 
-public class BusTrackerNetworkData {
+public class SpottedNetworkData {
     private int id;
     private String ref;
     private String name;
@@ -39,7 +39,7 @@ public class BusTrackerNetworkData {
     @NonNull
     @Override
     public String toString() {
-        return "BusTrackerNetworkData{" +
+        return "SpottedNetworkData{" +
                 "id=" + id +
                 ", ref='" + ref + '\'' +
                 ", name='" + name + '\'' +

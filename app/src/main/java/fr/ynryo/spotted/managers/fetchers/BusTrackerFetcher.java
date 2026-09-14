@@ -6,8 +6,8 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
-import fr.ynryo.spotted.apiResponsesPOJO.region.BusTrackerRegionData;
+import fr.ynryo.spotted.apiResponsesPOJO.network.SpottedNetworkData;
+import fr.ynryo.spotted.apiResponsesPOJO.region.SpottedRegionData;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.services.ApiClientFactory;
 import fr.ynryo.spotted.services.BusTrackerApiService;
@@ -31,13 +31,13 @@ public class BusTrackerFetcher {
     /**
      * Récupère la liste de l'ensemble des réseaux de transport disponibles.
      *
-     * @param listener Callback notifié avec la liste des {@link BusTrackerNetworkData}
+     * @param listener Callback notifié avec la liste des {@link SpottedNetworkData}
      */
     public void fetchNetworks(FetchingManager.OnNetworkListener listener) {
         try {
             apiService.getNetworks().enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull Call<List<BusTrackerNetworkData>> call, @NonNull Response<List<BusTrackerNetworkData>> response) {
+                public void onResponse(@NonNull Call<List<SpottedNetworkData>> call, @NonNull Response<List<SpottedNetworkData>> response) {
                     if (listener == null) return;
                     if (response.isSuccessful() && response.body() != null) {
                         listener.onResponseNetworkListener(response.body());
@@ -48,7 +48,7 @@ public class BusTrackerFetcher {
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<List<BusTrackerNetworkData>> call, @NonNull Throwable t) {
+                public void onFailure(@NonNull Call<List<SpottedNetworkData>> call, @NonNull Throwable t) {
                     Log.e(TAG, "fetchNetworks échec: " + t.getMessage(), t);
                     if (listener == null) return;
                     listener.onErrorNetworkListener(t.getMessage());
@@ -64,13 +64,13 @@ public class BusTrackerFetcher {
     /**
      * Récupère la liste des régions disponibles sur Bus-Tracker.
      *
-     * @param listener Callback notifié avec la liste des {@link BusTrackerRegionData}
+     * @param listener Callback notifié avec la liste des {@link SpottedRegionData}
      */
     public void fetchRegions(FetchingManager.OnRegionsListener listener) {
         try {
             apiService.getRegions().enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NonNull Call<List<BusTrackerRegionData>> call, @NonNull Response<List<BusTrackerRegionData>> response) {
+                public void onResponse(@NonNull Call<List<SpottedRegionData>> call, @NonNull Response<List<SpottedRegionData>> response) {
                     if (listener == null) return;
                     if (response.isSuccessful() && response.body() != null) {
                         listener.onResponseRegionsListener(response.body());
@@ -81,7 +81,7 @@ public class BusTrackerFetcher {
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<List<BusTrackerRegionData>> call, @NonNull Throwable t) {
+                public void onFailure(@NonNull Call<List<SpottedRegionData>> call, @NonNull Throwable t) {
                     Log.e(TAG, "fetchRegions échec: " + t.getMessage(), t);
                     if (listener == null) return;
                     listener.onErrorRegionsListener(t.getMessage());

@@ -5,8 +5,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.List;
 
 import fr.ynryo.spotted.MainActivity;
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
-import fr.ynryo.spotted.apiResponsesPOJO.region.BusTrackerRegionData;
+import fr.ynryo.spotted.apiResponsesPOJO.network.SpottedNetworkData;
+import fr.ynryo.spotted.apiResponsesPOJO.region.SpottedRegionData;
 import fr.ynryo.spotted.apiResponsesPOJO.version.YnryoVersionResponse;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.managers.fetchers.BusTrackerFetcher;
@@ -46,13 +46,13 @@ public class FetchingManager {
     }
 
     public interface OnNetworkListener {
-        void onResponseNetworkListener(List<BusTrackerNetworkData> data);
+        void onResponseNetworkListener(List<SpottedNetworkData> data);
 
         void onErrorNetworkListener(String error);
     }
 
     public interface OnRegionsListener {
-        void onResponseRegionsListener(List<BusTrackerRegionData> regions);
+        void onResponseRegionsListener(List<SpottedRegionData> regions);
 
         void onErrorRegionsListener(String error);
     }

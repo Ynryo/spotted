@@ -11,7 +11,7 @@ public class SpottedMarkersResponse {
     private int count;
 
     @SerializedName("data")
-    private List<BusTrackerMarkerData> data;
+    private List<SpottedMarkerData> data;
 
     @SerializedName("datetime")
     private String datetime;
@@ -20,7 +20,7 @@ public class SpottedMarkersResponse {
         return count;
     }
 
-    public List<BusTrackerMarkerData> getData() {
+    public List<SpottedMarkerData> getData() {
         return data;
     }
 

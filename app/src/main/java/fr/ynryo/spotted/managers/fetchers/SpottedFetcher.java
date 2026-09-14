@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.ynryo.spotted.apiResponsesPOJO.journey.SpottedJourneyDetails;
-import fr.ynryo.spotted.apiResponsesPOJO.markers.BusTrackerMarkerData;
+import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkerData;
 import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkersResponse;
 import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathResponse;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
@@ -79,18 +79,18 @@ public class SpottedFetcher {
     }
 
     /**
-     * Convertit une liste de POJO {@link BusTrackerMarkerData} en une liste d'objets métier {@link MarkerStandardized}.
+     * Convertit une liste de POJO {@link SpottedMarkerData} en une liste d'objets métier {@link MarkerStandardized}.
      *
      * @param markerDataList Liste brute des marqueurs issue de la réponse API
      * @return Liste d'objets {@link MarkerStandardized} typés
      */
-    private List<MarkerStandardized> convertMarkerDataList(List<BusTrackerMarkerData> markerDataList) {
+    private List<MarkerStandardized> convertMarkerDataList(List<SpottedMarkerData> markerDataList) {
         List<MarkerStandardized> result = new ArrayList<>();
         if (markerDataList == null || markerDataList.isEmpty()) {
             return result;
         }
 
-        for (BusTrackerMarkerData markerData : markerDataList) {
+        for (SpottedMarkerData markerData : markerDataList) {
             try {
                 MarkerType type = MarkerType.guessFromMarkerId(markerData.getId());
                 MarkerStandardized standardized = MarkerStandardized.createNewMarkerFrom(markerData, type);

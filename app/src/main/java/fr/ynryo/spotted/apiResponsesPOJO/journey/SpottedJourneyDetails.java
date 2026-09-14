@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.markers.BusTrackerMarkerPosition;
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
+import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkerPosition;
+import fr.ynryo.spotted.apiResponsesPOJO.network.SpottedNetworkData;
 import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathResponse;
 
 public class SpottedJourneyDetails {
@@ -31,10 +31,10 @@ public class SpottedJourneyDetails {
     private List<SpottedStopDetails> stops;
 
     @SerializedName("position")
-    private BusTrackerMarkerPosition position;
+    private SpottedMarkerPosition position;
 
     @SerializedName("network")
-    private BusTrackerNetworkData network;
+    private SpottedNetworkData network;
 
     @SerializedName("path")
     private SpottedPathResponse path;
@@ -70,11 +70,11 @@ public class SpottedJourneyDetails {
         return stops;
     }
 
-    public BusTrackerMarkerPosition getPosition() {
+    public SpottedMarkerPosition getPosition() {
         return position;
     }
 
-    public BusTrackerNetworkData getNetwork() {
+    public SpottedNetworkData getNetwork() {
         return network;
     }
 
