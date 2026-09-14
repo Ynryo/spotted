@@ -41,8 +41,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.guessPlatform.CartoTchooGuessPlatform;
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
+import fr.ynryo.spotted.MainActivity;
+import fr.ynryo.spotted.R;
 import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
@@ -189,35 +189,13 @@ public class MarkerStopsDetailActivity {
                 }
 
                 showVehicleDetails(markerStandardized, view);
-                fetchNetworkLogo(markerStandardized, view);
+                loadNetworkLogo(view, markerStandardized.getNetworkLogoHref());
             }
 
             @Override
             public void onErrorVehicleDetailsListener(String error) {
                 hideLoader(view);
                 showError(view);
-            }
-        });
-    }
-
-    /**
-     * Fetch network logo from API
-     *
-     * @param markerStandardized the marker data
-     * @param view               the view
-     */
-    private void fetchNetworkLogo(MarkerStandardized markerStandardized, View view) {
-        if (markerStandardized.getNetworkId() == 0) return;
-
-        context.getFetcher().fetchNetworkData(markerStandardized.getNetworkId(), new FetchingManager.OnNetworkDataListener() {
-            @Override
-            public void onResponseNetworkDataListener(BusTrackerNetworkData nData) {
-                loadNetworkLogo(view, nData.getLogoHref());
-            }
-
-            @Override
-            public void onErrorNetworkDataListener(String error) {
-                Log.w(TAG, "Erreur lors de la récuperation du logo");
             }
         });
     }
@@ -275,8 +253,7 @@ public class MarkerStopsDetailActivity {
         context.getFavoriteManager().setFavoriteButton(view.findViewById(R.id.favoriteButton), markerStandardized);
 
         setupDestinationText(view, markerStandardized);
-        StopsAdapter adapter = setupStopsList(view, markerStandardized);
-        fetchGuessPlatforms(markerStandardized, adapter);
+        setupStopsList(view, markerStandardized);
     }
 
     /**
@@ -295,7 +272,7 @@ public class MarkerStopsDetailActivity {
         tvDestination.setSelected(true);
     }
 
-    private StopsAdapter setupStopsList(View view, MarkerStandardized markerStandardized) {
+    private void setupStopsList(View view, MarkerStandardized markerStandardized) {
         RecyclerView rvStops = view.findViewById(R.id.rvStops);
         rvStops.setLayoutManager(new LinearLayoutManager(context));
 
@@ -304,48 +281,6 @@ public class MarkerStopsDetailActivity {
         rvStops.setAdapter(adapter);
 
         view.findViewById(R.id.llStopsContent).setVisibility(View.VISIBLE);
-        return adapter;
-    }
-
-    private void fetchGuessPlatforms(MarkerStandardized markerStandardized, StopsAdapter adapter) {
-        if (!markerStandardized.isTrain()) return;
-
-        String trainNum = markerStandardized.getLineNumber();
-        if (markerStandardized.isUm() && markerStandardized.getUmA() != null) {
-            trainNum = markerStandardized.getUmA().getLineNumber();
-        }
-        if (trainNum == null || trainNum.isEmpty()) return;
-
-        List<MarkerStop> stops = markerStandardized.getStops();
-        for (int i = 0; i < stops.size(); i++) {
-            MarkerStop stop = stops.get(i);
-            // Si l'arrêt a déjà un quai officiel renseigné (100%), on ne fait pas de requête CartoTchoo
-            if (stop.getPlatform() != null && stop.getPlatform().getPlatformName() != null && !stop.getPlatform().getPlatformName().isEmpty()) {
-                continue;
-            }
-            final int position = i;
-            final String uic = stop.getStopRef();
-            if (uic == null || uic.isEmpty()) continue;
-
-            Log.d(TAG, "Fetching guess platform: uic=" + uic + ", trainNum=" + trainNum);
-            context.getFetcher().fetchGuestPlatform(uic, trainNum, new FetchingManager.OnGuessPlatformListener() {
-                @Override
-                public void onResponseGuessPlatformListener(List<CartoTchooGuessPlatform> cartoTchooGuessPlatform) {
-                    Log.d(TAG, "Réponse guess platform pour UIC " + uic + ": " + cartoTchooGuessPlatform);
-                    if (cartoTchooGuessPlatform != null && !cartoTchooGuessPlatform.isEmpty()) {
-                        markerStandardized.setGuessStopPlatform(uic, cartoTchooGuessPlatform);
-                        if (adapter != null) {
-                            adapter.notifyItemChanged(position);
-                        }
-                    }
-                }
-
-                @Override
-                public void onErrorGuessPlatformListener(String error) {
-                    Log.d(TAG, "Pas d'estimation de quai pour UIC " + uic + " : " + error);
-                }
-            });
-        }
     }
 
     private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
