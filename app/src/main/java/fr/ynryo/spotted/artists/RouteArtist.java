@@ -40,7 +40,7 @@ public class RouteArtist {
 
     public void drawVehicleRoute(MarkerStandardized mData) {
         if (mData == null) return;
-        if (mData.getPathRef() != null) {
+        if (mData.getPathRefs() != null) {
             context.getFetcher().fetchBusLine(mData, new FetchingManager.OnRouteLineListener() {
                 @Override
                 public void onResponseRouteLineListener(MarkerStandardized mData) {
@@ -55,18 +55,39 @@ public class RouteArtist {
 
                         remove();
                         try {
-                            List<List<Double>> allPoints;
                             Object geometry = ((BusTrackerVehiclePath) mData.getMarkerDataRoute()).getGeometry();
                             if (geometry instanceof List) {
-                                allPoints = (List<List<Double>>) geometry;
-                                for (List<Double> point : allPoints) {
-                                    options.add(new LatLng(point.get(0), point.get(1)));
-                                    pointsAdded = true;
+                                List<?> rawList = (List<?>) geometry;
+                                if (!rawList.isEmpty() && rawList.get(0) instanceof List) {
+                                    List<?> firstElem = (List<?>) rawList.get(0);
+                                    if (!firstElem.isEmpty() && firstElem.get(0) instanceof List) {
+                                        // MultiLineString: List<List<List<Double>>>
+                                        for (Object lineObj : rawList) {
+                                            if (lineObj instanceof List) {
+                                                for (Object ptObj : (List<?>) lineObj) {
+                                                    if (ptObj instanceof List) {
+                                                        List<Double> pt = (List<Double>) ptObj;
+                                                        options.add(new LatLng(pt.get(0), pt.get(1)));
+                                                        pointsAdded = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        // LineString simple: List<List<Double>>
+                                        for (Object ptObj : rawList) {
+                                            if (ptObj instanceof List) {
+                                                List<Double> pt = (List<Double>) ptObj;
+                                                options.add(new LatLng(pt.get(0), pt.get(1)));
+                                                pointsAdded = true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        } catch (ClassCastException e) {
+                        } catch (Exception e) {
                             remove();
-                            Log.e(TAG, "Format de coordonnées invalide pour LineString");
+                            Log.e(TAG, "Format de coordonnées invalide pour la route: " + e.getMessage());
                         }
                         if (pointsAdded) {
                             currentMarkerId = mData.getId();

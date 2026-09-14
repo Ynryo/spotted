@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -54,6 +55,7 @@ public class MarkerStandardized {
     }
 
     // ==================== CONVERSION & FACTORY ====================
+
     /**
      * Converts a {@link BusTrackerMarkerData} object into a {@link MarkerStandardized} object with the specified {@link MarkerType}.
      *
@@ -245,14 +247,44 @@ public class MarkerStandardized {
 
     // --- Voyage et arrêts ---
     public String getDestination() {
+        if (isUm()) {
+            String destA = umA != null ? umA.getDestination() : null;
+            String destB = umB != null ? umB.getDestination() : null;
+            if (destA != null && !destA.isEmpty() && destB != null && !destB.isEmpty()) {
+                return destA.equalsIgnoreCase(destB) ? destA : destA + "/" + destB;
+            } else if (destA != null && !destA.isEmpty()) {
+                return destA;
+            } else if (destB != null && !destB.isEmpty()) {
+                return destB;
+            }
+        }
         return markerTrip.getDestination();
     }
 
     public String getPathRef() {
-        if (isUm() && umA != null && (markerTrip.getPathRef() == null || markerTrip.getPathRef().isEmpty())) {
-            return umA.getPathRef();
-        }
         return markerTrip.getPathRef();
+    }
+
+    public List<String> getPathRefs() {
+        if (isUm()) {
+            List<String> list = new ArrayList<>();
+            String pathA = umA != null ? umA.getPathRef() : null;
+            String pathB = umB != null ? umB.getPathRef() : null;
+            if (pathA != null && !pathA.isEmpty()) {
+                list.add(pathA);
+            }
+            if (pathB != null && !pathB.isEmpty() && !pathB.equals(pathA)) {
+                list.add(pathB);
+            }
+            if (!list.isEmpty()) {
+                return list;
+            }
+        }
+        String single = getPathRef();
+        if (single != null && !single.isEmpty()) {
+            return Collections.singletonList(single);
+        }
+        return Collections.emptyList();
     }
 
     public List<MarkerStop> getStops() {
@@ -444,8 +476,20 @@ public class MarkerStandardized {
         this.markerTrip.setDestination(destination);
     }
 
+    public void setDestinations(String destinationA, String destinationB) {
+        if (!isUm()) return;
+        this.umA.setDestination(destinationA);
+        this.umB.setDestination(destinationB);
+    }
+
     public void setPathRef(String pathRef) {
         this.markerTrip.setPathRef(pathRef);
+    }
+
+    public void setPathRefs(String pathRefA, String pathRefB) {
+        if (!isUm()) return;
+        this.umA.setPathRef(pathRefA);
+        this.umB.setPathRef(pathRefB);
     }
 
     /**

@@ -22,14 +22,14 @@ public class TrainUmDetector {
 
         for (int i = 0; i < result.size(); i++) {
             MarkerStandardized a = result.get(i);
-            if (!a.isTrain() || a.getBearing() == 0) continue; //bearing == 0 == gare
+            if (!a.isTrain() || a.getBearing() == 0) continue; //bearing == 0 == très grandes chances d'être une gare
 
             for (int j = i + 1; j < result.size(); j++) {
                 MarkerStandardized b = result.get(j);
                 if (!b.isTrain() || b.getBearing() == 0) continue;
 
                 if (areColocated(a, b)) {
-                    result.set(i, TrainUmAssembler.buildUmMarker(a, b)); // remplace a par l'UM
+                    result.set(i, TrainUmProcessor.buildUmMarker(a, b)); // remplace a par l'UM
                     result.remove(j); // supprime b
                     break; // a ne peut avoir qu'un seul partenaire
                 }

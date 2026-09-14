@@ -19,7 +19,7 @@ import fr.ynryo.spotted.apiResponsesPOJO.vehicle.BusTrackerVehicleDetails;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerType;
 import fr.ynryo.spotted.managers.FetchingManager;
-import fr.ynryo.spotted.managers.um.TrainUmAssembler;
+import fr.ynryo.spotted.managers.um.TrainUmProcessor;
 import fr.ynryo.spotted.services.ApiClientFactory;
 import fr.ynryo.spotted.services.BusTrackerApiService;
 import retrofit2.Call;
@@ -55,13 +55,7 @@ public class BusTrackerFetcher {
             return;
         }
 
-        apiService.getVehicleMarkers(
-                bounds.southwest.latitude,
-                bounds.southwest.longitude,
-                bounds.northeast.latitude,
-                bounds.northeast.longitude,
-                lineId
-        ).enqueue(new Callback<>() {
+        apiService.getVehicleMarkers(bounds.southwest.latitude, bounds.southwest.longitude, bounds.northeast.latitude, bounds.northeast.longitude, lineId).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<BusTrackerMarkersList> call, @NonNull Response<BusTrackerMarkersList> response) {
                 if (listener == null) return;
@@ -111,7 +105,7 @@ public class BusTrackerFetcher {
     /**
      * Récupère les détails d'un véhicule (arrêts, horaires, retards, etc.).
      * Si le véhicule est une unité multiple (UM), récupère récursivement les détails de chaque rame
-     * et les assemble via {@link TrainUmAssembler}.
+     * et les assemble via {@link TrainUmProcessor}.
      *
      * @param markerStandardized Le marqueur du véhicule dont on souhaite charger les détails
      * @param listener           Callback notifié avec le marqueur enrichi ou l'erreur survenue
@@ -126,17 +120,20 @@ public class BusTrackerFetcher {
                     public void onResponseVehicleDetailsListener(MarkerStandardized data) {
                         responsesReceived++;
                         if (responsesReceived == 2) {
-                            TrainUmAssembler.assembleUmStops(markerStandardized);
-                            if (markerStandardized.getUmA() != null) {
-                                if (markerStandardized.getUmA().getStops() != null) {
-                                    markerStandardized.setStops(markerStandardized.getUmA().getStops());
-                                }
-                                markerStandardized.setPathRef(markerStandardized.getUmA().getPathRef());
-                                markerStandardized.setDestination(TrainUmAssembler.getDestination(markerStandardized));
+                            if (markerStandardized.getUmA() != null && markerStandardized.getUmA().getStops() != null) {
+                                markerStandardized.setStops(markerStandardized.getUmA().getStops());
+                                markerStandardized.setPathRefs(
+                                        markerStandardized.getUmA().getPathRef(),
+                                        markerStandardized.getUmB().getPathRef()
+                                );
                             }
-                            if (listener == null) return;
-                            listener.onResponseVehicleDetailsListener(markerStandardized);
+                            markerStandardized.setDestinations(
+                                    markerStandardized.getUmA().getDestination(),
+                                    markerStandardized.getUmB().getDestination()
+                            );
                         }
+                        if (listener == null) return;
+                        listener.onResponseVehicleDetailsListener(markerStandardized);
                     }
 
                     @Override
@@ -216,15 +213,128 @@ public class BusTrackerFetcher {
      * @param listener           Callback notifié avec le marqueur enrichi de son tracé
      */
     public void fetchBusLine(MarkerStandardized markerStandardized, FetchingManager.OnRouteLineListener listener) {
+        if (markerStandardized == null) {
+            if (listener != null) listener.onErrorRouteLineListener("Marker is null");
+            return;
+        }
+
         try {
-            String encodedPathRef = URLEncoder.encode(markerStandardized.getPathRef(), "UTF-8");
+            if (markerStandardized.isUm()) {
+                MarkerStandardized trainA = markerStandardized.getUmA();
+                MarkerStandardized trainB = markerStandardized.getUmB();
+
+                String pathRefA = trainA != null ? trainA.getPathRef() : null;
+                String pathRefB = trainB != null ? trainB.getPathRef() : null;
+
+                //si les deux rames partagent exactement le même pathRef
+                if (pathRefA != null && pathRefA.equals(pathRefB)) {
+                    fetchSingleBusLine(pathRefA, markerStandardized, listener);
+                    return;
+                }
+
+                //si une seule rame dispose d'un pathRef valide
+                if (pathRefA != null && !pathRefA.isEmpty() && (pathRefB == null || pathRefB.isEmpty())) {
+                    fetchSingleBusLine(pathRefA, markerStandardized, listener);
+                    return;
+                }
+                if (pathRefB != null && !pathRefB.isEmpty() && (pathRefA == null || pathRefA.isEmpty())) {
+                    fetchSingleBusLine(pathRefB, markerStandardized, listener);
+                    return;
+                }
+
+                //si les deux rames ont des pathRef distincts, on fetch les deux et on assemble
+                if (pathRefA != null && !pathRefA.isEmpty() && pathRefB != null && !pathRefB.isEmpty()) {
+                    final BusTrackerVehiclePath[] routes = new BusTrackerVehiclePath[2];
+                    final int[] responsesReceived = new int[]{0};
+
+                    FetchingManager.OnRouteLineListener syncListener = new FetchingManager.OnRouteLineListener() {
+                        @Override
+                        public void onResponseRouteLineListener(MarkerStandardized m) {
+                            responsesReceived[0]++;
+                            if (responsesReceived[0] == 2) {
+                                BusTrackerVehiclePath assembled = TrainUmProcessor.assembleRouteUm(routes[0], routes[1]);
+                                markerStandardized.setMarkerDataRoute(assembled);
+                                if (listener != null) {
+                                    listener.onResponseRouteLineListener(markerStandardized);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onErrorRouteLineListener(String error) {
+                            Log.e(TAG, "fetchBusLine UM erreur: " + error);
+                            responsesReceived[0]++;
+                            if (responsesReceived[0] == 2) {
+                                BusTrackerVehiclePath assembled = TrainUmProcessor.assembleRouteUm(routes[0], routes[1]);
+                                markerStandardized.setMarkerDataRoute(assembled);
+                                if (listener != null) {
+                                    listener.onResponseRouteLineListener(markerStandardized);
+                                }
+                            }
+                        }
+                    };
+
+                    //on redirige vers fetchSingleBusLine pour chaque véhicule
+                    fetchSingleBusLine(pathRefA, trainA, new FetchingManager.OnRouteLineListener() {
+                        @Override
+                        public void onResponseRouteLineListener(MarkerStandardized m) {
+                            if (m.getMarkerDataRoute() instanceof BusTrackerVehiclePath) {
+                                routes[0] = (BusTrackerVehiclePath) m.getMarkerDataRoute();
+                            }
+                            syncListener.onResponseRouteLineListener(m);
+                        }
+
+                        @Override
+                        public void onErrorRouteLineListener(String error) {
+                            syncListener.onErrorRouteLineListener(error);
+                        }
+                    });
+
+                    fetchSingleBusLine(pathRefB, trainB, new FetchingManager.OnRouteLineListener() {
+                        @Override
+                        public void onResponseRouteLineListener(MarkerStandardized m) {
+                            if (m.getMarkerDataRoute() instanceof BusTrackerVehiclePath) {
+                                routes[1] = (BusTrackerVehiclePath) m.getMarkerDataRoute();
+                            }
+                            syncListener.onResponseRouteLineListener(m);
+                        }
+
+                        @Override
+                        public void onErrorRouteLineListener(String error) {
+                            syncListener.onErrorRouteLineListener(error);
+                        }
+                    });
+                    return;
+                }
+            }
+
+            // Cas par défaut (Bus, Tram, Train US)
+            fetchSingleBusLine(markerStandardized.getPathRef(), markerStandardized, listener);
+        } catch (Exception e) {
+            Log.e(TAG, "fetchBusLine exception: " + e.getMessage(), e);
+            if (listener == null) return;
+            listener.onErrorRouteLineListener(e.getMessage());
+        }
+    }
+
+    /**
+     * Récupère le tracé pour une seule référence de chemin (pathRef) et l'assigne au marqueur cible.
+     */
+    private void fetchSingleBusLine(String pathRef, MarkerStandardized targetMarker, FetchingManager.OnRouteLineListener listener) {
+        if (pathRef == null || pathRef.isEmpty()) {
+            if (listener != null) listener.onErrorRouteLineListener("PathRef is null or empty");
+            return;
+        }
+
+        try {
+            String encodedPathRef = URLEncoder.encode(pathRef, "UTF-8");
             apiService.getPath(encodedPathRef).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<BusTrackerVehiclePath> call, @NonNull Response<BusTrackerVehiclePath> response) {
                     if (listener == null) return;
                     if (response.isSuccessful() && response.body() != null) {
-                        markerStandardized.setMarkerDataRoute(response.body());
-                        listener.onResponseRouteLineListener(markerStandardized);
+                        targetMarker.setMarkerDataRoute(response.body());
+                        listener.onResponseRouteLineListener(targetMarker);
                     } else {
                         Log.e(TAG, "fetchBusLine code erreur: " + response.code());
                         listener.onErrorRouteLineListener("Erreur: " + response);
