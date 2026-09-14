@@ -5,14 +5,12 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.List;
 
 import fr.ynryo.spotted.MainActivity;
-import fr.ynryo.spotted.apiResponsesPOJO.guessPlatform.CartoTchooGuessPlatform;
 import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
 import fr.ynryo.spotted.apiResponsesPOJO.region.BusTrackerRegionData;
 import fr.ynryo.spotted.apiResponsesPOJO.version.YnryoVersionResponse;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.managers.fetchers.BusTrackerFetcher;
 import fr.ynryo.spotted.managers.fetchers.SpottedFetcher;
-import fr.ynryo.spotted.managers.fetchers.TchooFetcher;
 import fr.ynryo.spotted.managers.fetchers.YnryoFetcher;
 
 /**
@@ -25,14 +23,12 @@ public class FetchingManager {
     private final MainActivity context;
     private final SpottedFetcher spottedFetcher;
     private final BusTrackerFetcher busTrackerFetcher;
-    private final TchooFetcher tchooFetcher;
     private final YnryoFetcher ynryoFetcher;
 
     public FetchingManager(MainActivity context) {
         this.context = context;
         this.spottedFetcher = new SpottedFetcher();
         this.busTrackerFetcher = new BusTrackerFetcher();
-        this.tchooFetcher = new TchooFetcher();
         this.ynryoFetcher = new YnryoFetcher();
     }
 
@@ -47,18 +43,6 @@ public class FetchingManager {
         void onResponseVehicleDetailsListener(MarkerStandardized markerStandardized);
 
         void onErrorVehicleDetailsListener(String error);
-    }
-
-    public interface OnNetworkDataListener {
-        void onResponseNetworkDataListener(BusTrackerNetworkData data);
-
-        void onErrorNetworkDataListener(String error);
-    }
-
-    public interface OnRouteLineListener {
-        void onResponseRouteLineListener(MarkerStandardized data);
-
-        void onErrorRouteLineListener(String error);
     }
 
     public interface OnNetworkListener {
@@ -85,12 +69,6 @@ public class FetchingManager {
         void onErrorVehicleAliveListener(String error);
     }
 
-    public interface OnGuessPlatformListener {
-        void onResponseGuessPlatformListener(List<CartoTchooGuessPlatform> cartoTchooGuessPlatform);
-
-        void onErrorGuessPlatformListener(String error);
-    }
-
     // ==================== FETCH MARKERS (PRINCIPAL) ====================
     public void fetchMarkers(OnMarkersListener listener) {
         fetchMarkers(null, listener);
@@ -104,17 +82,7 @@ public class FetchingManager {
 
     // ==================== FETCH VEHICLE DETAILS ====================
     public void fetchVehicleStopsInfo(MarkerStandardized markerStandardized, OnVehicleDetailsListener listener) {
-        busTrackerFetcher.fetchVehicleStopsInfo(markerStandardized, listener);
-    }
-
-    // ==================== FETCH NETWORK DATA ====================
-    public void fetchNetworkData(int networkId, OnNetworkDataListener listener) {
-        busTrackerFetcher.fetchNetworkData(networkId, listener);
-    }
-
-    // ==================== FETCH ROUTE LINE ====================
-    public void fetchBusLine(MarkerStandardized markerStandardized, OnRouteLineListener listener) {
-        busTrackerFetcher.fetchBusLine(markerStandardized, listener);
+        spottedFetcher.fetchVehicleStopsInfo(markerStandardized, listener);
     }
 
     // ==================== FETCH NETWORKS ====================
@@ -134,11 +102,6 @@ public class FetchingManager {
 
     // ==================== FETCH IS ALIVE VERSION ====================
     public void fetchVehicleAlive(String vehicleId, OnVehicleAliveListener listener) {
-        busTrackerFetcher.fetchVehicleAlive(vehicleId, listener);
-    }
-
-    // ==================== FETCH GUEST PLATFORM ====================
-    public void fetchGuestPlatform(String uicCode, String trainNum, OnGuessPlatformListener listener) {
-        tchooFetcher.fetchGuestPlatform(uicCode, trainNum, listener);
+        spottedFetcher.fetchVehicleAlive(vehicleId, listener);
     }
 }
