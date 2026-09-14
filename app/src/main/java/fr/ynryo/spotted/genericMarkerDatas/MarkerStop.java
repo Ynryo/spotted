@@ -20,8 +20,7 @@ public class MarkerStop {
     private double longitude; // Longitude de l'arrêt
     private int stopOrder; // Position dans la liste des arrêts (0, 1, 2, ...)
     private boolean isOnLive; // Statut de l'appel (EXPECTED, ACTUAL, etc.)
-    private boolean isDestinationStop = false;
-    private boolean isDepartureStop = false;
+    private String timelineStopType; // Type d'arrêt pour la timeline (START, INTERMEDIATE, END)
     private MarkerStandardized vehicle; // Véhicle parent
 
     private final static String TAG = "MarkerStop";
@@ -44,12 +43,11 @@ public class MarkerStop {
         this.longitude = markerStop.longitude;
         this.stopOrder = markerStop.stopOrder;
         this.isOnLive = markerStop.isOnLive;
-        this.isDestinationStop = markerStop.isDestinationStop;
-        this.isDepartureStop = markerStop.isDepartureStop;
+        this.timelineStopType = markerStop.timelineStopType;
         this.vehicle = markerStop.vehicle;
     }
 
-    public MarkerStop(String stopRef, String stopName, Long delay, Time departureTime, int stopOrder, double longitude, double latitude, double distanceTraveled, boolean isDepartureStop, boolean isDestinationStop, MarkerStandardized vehicle) {
+    public MarkerStop(String stopRef, String stopName, Long delay, Time departureTime, int stopOrder, double longitude, double latitude, double distanceTraveled, String timelineStopType, MarkerStandardized vehicle) {
         this.stopRef = stopRef;
         this.stopName = stopName;
         this.departureTime = departureTime;
@@ -59,8 +57,7 @@ public class MarkerStop {
         this.distanceTraveled = distanceTraveled;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.isDepartureStop = isDepartureStop;
-        this.isDestinationStop = isDestinationStop;
+        this.timelineStopType = timelineStopType;
         this.vehicle = vehicle;
     }
 
@@ -119,12 +116,20 @@ public class MarkerStop {
         return isOnLive;
     }
 
+    public String getTimelineStopType() {
+        return timelineStopType;
+    }
+
+    public void setTimelineStopType(String timelineStopType) {
+        this.timelineStopType = timelineStopType;
+    }
+
     public boolean isDepartureStop() {
-        return isDepartureStop;
+        return "START".equalsIgnoreCase(timelineStopType);
     }
 
     public boolean isDestinationStop() {
-        return isDestinationStop;
+        return "END".equalsIgnoreCase(timelineStopType);
     }
 
     // ==================== SETTERS ====================
@@ -180,14 +185,6 @@ public class MarkerStop {
 
     public void setOnLive(boolean onLive) {
         this.isOnLive = onLive;
-    }
-
-    public void setIsDestinationStop(boolean isDestinationStop) {
-        this.isDestinationStop = isDestinationStop;
-    }
-
-    public void setIsDepartureStop(boolean isDepartureStop) {
-        this.isDepartureStop = isDepartureStop;
     }
 
     public void setVehicle(MarkerStandardized markerStandardized) {
@@ -267,8 +264,7 @@ public class MarkerStop {
                 ", longitude=" + longitude +
                 ", stopOrder=" + stopOrder +
                 ", isOnLive=" + isOnLive +
-                ", isDestinationStop=" + isDestinationStop +
-                ", isDepartureStop=" + isDepartureStop +
+                ", timelineStopType='" + timelineStopType + '\'' +
                 '}';
     }
 }

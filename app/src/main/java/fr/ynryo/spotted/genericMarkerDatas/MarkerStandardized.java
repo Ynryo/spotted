@@ -158,8 +158,7 @@ public class MarkerStandardized {
                     stopDetails.getLongitude(),
                     stopDetails.getLatitude(),
                     stopDetails.getDistanceTraveled(),
-                    i == 0 || stopDetails.getDistanceTraveled() == 0,
-                    i == journeyDetails.getStops().size() - 1,
+                    stopDetails.getStopType(),
                     this
             );
 

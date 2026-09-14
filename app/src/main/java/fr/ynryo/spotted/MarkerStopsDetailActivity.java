@@ -283,16 +283,15 @@ public class MarkerStopsDetailActivity {
         view.findViewById(R.id.llStopsContent).setVisibility(View.VISIBLE);
     }
 
-    private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
-        boolean isFirstStop = stop.isDepartureStop();
-        boolean isLastStop = position == itemCount - 1 || stop.isDestinationStop();
-        if (isFirstStop) {
-            return R.layout.timeline_first_stop;
-        } else if (isLastStop) {
-            return R.layout.timeline_last_stop;
-        } else {
-            return R.layout.timeline_intermediate_stop;
+    private static int getTimelineLayout(MarkerStop stop) {
+        if (stop != null) {
+            if ("START".equalsIgnoreCase(stop.getTimelineStopType())) {
+                return R.layout.timeline_first_stop;
+            } else if ("END".equalsIgnoreCase(stop.getTimelineStopType())) {
+                return R.layout.timeline_last_stop;
+            }
         }
+        return R.layout.timeline_intermediate_stop;
     }
 
     // ==================== ADAPTER ====================
@@ -384,7 +383,7 @@ public class MarkerStopsDetailActivity {
             }
 
             MarkerStop stop = stops.get(position);
-            bindStopViewHolder((StopViewHolder) holder, stop, position, stops.size());
+            bindStopViewHolder((StopViewHolder) holder, stop);
         }
 
         /**
@@ -433,8 +432,8 @@ public class MarkerStopsDetailActivity {
             return new StopViewHolder(view);
         } //inflate item stop
 
-        private void bindStopViewHolder(StopViewHolder vh, MarkerStop stop, int position, int itemCount) { //distribute data
-            bindTimeline(vh, stop, position, itemCount);
+        private void bindStopViewHolder(StopViewHolder vh, MarkerStop stop) { //distribute data
+            bindTimeline(vh, stop);
             bindPlatform(vh, stop);
             bindStopName(vh, stop);
             bindArrivalTime(vh, stop);
@@ -443,14 +442,14 @@ public class MarkerStopsDetailActivity {
             bindDelay(vh, stop);
         }
 
-        public void bindTimeline(StopViewHolder vh, MarkerStop stop, int position, int itemCount) {
+        public void bindTimeline(StopViewHolder vh, MarkerStop stop) {
             MarkerStandardized vehicle = stop.getVehicle();
 
             vh.flTimeline.setVisibility(View.VISIBLE);
             vh.flTimeline.removeAllViews();
 
             // Inflate le layout dedans
-            View timelineView = LayoutInflater.from(context).inflate(getTimelineLayout(stop, position, itemCount), vh.flTimeline, true);
+            View timelineView = LayoutInflater.from(context).inflate(getTimelineLayout(stop), vh.flTimeline, true);
 
             // Tinte la barre avec la couleur du train
             int fillColor = Color.parseColor(vehicle.getFillColor() != null ? vehicle.getFillColor() : "#424242");
