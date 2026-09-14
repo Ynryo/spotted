@@ -22,10 +22,10 @@ import java.util.List;
 
 import fr.ynryo.spotted.MainActivity;
 import fr.ynryo.spotted.R;
-import fr.ynryo.spotted.apiResponsesPOJO.bus.BusTrackerVehiclePath;
+import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathPoint;
+import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathResponse;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
-import fr.ynryo.spotted.managers.FetchingManager;
 
 public class RouteArtist {
     private final static String TAG = "RouteArtist";
@@ -39,49 +39,30 @@ public class RouteArtist {
     }
 
     public void drawVehicleRoute(MarkerStandardized mData) {
-        if (mData == null) return;
-        if (mData.getPathRef() != null) {
-            context.getFetcher().fetchBusLine(mData, new FetchingManager.OnRouteLineListener() {
-                @Override
-                public void onResponseRouteLineListener(MarkerStandardized mData) {
-                    if (mData.getMarkerDataRoute() != null) {
-                        PolylineOptions options = new PolylineOptions()
-                                .width(16f)
-                                .color(Color.parseColor(mData.getFillColor() != null ? mData.getFillColor() : "#424242"))
-                                .geodesic(true)
-                                .zIndex(2.0f);
+        if (mData == null || mData.getMarkerDataRoute() == null) return;
 
-                        boolean pointsAdded = false;
+        PolylineOptions options = new PolylineOptions()
+                .width(16f)
+                .color(Color.parseColor(mData.getFillColor() != null ? mData.getFillColor() : "#424242"))
+                .geodesic(true)
+                .zIndex(2.0f);
 
-                        remove();
-                        try {
-                            List<List<Double>> allPoints;
-                            Object geometry = ((BusTrackerVehiclePath) mData.getMarkerDataRoute()).getGeometry();
-                            if (geometry instanceof List) {
-                                allPoints = (List<List<Double>>) geometry;
-                                for (List<Double> point : allPoints) {
-                                    options.add(new LatLng(point.get(0), point.get(1)));
-                                    pointsAdded = true;
-                                }
-                            }
-                        } catch (ClassCastException e) {
-                            remove();
-                            Log.e(TAG, "Format de coordonnées invalide pour LineString");
-                        }
-                        if (pointsAdded) {
-                            currentMarkerId = mData.getId();
-                            currentRoutePolyline = context.getMap().addPolyline(options);
-                            drawStopCircles(mData);
-                        }
-                    }
+        boolean pointsAdded = false;
+
+        remove();
+        if (mData.getMarkerDataRoute() instanceof SpottedPathResponse) {
+            SpottedPathResponse path = (SpottedPathResponse) mData.getMarkerDataRoute();
+            if (path.getPoints() != null) {
+                for (SpottedPathPoint point : path.getPoints()) {
+                    options.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                    pointsAdded = true;
                 }
-
-                @Override
-                public void onErrorRouteLineListener(String error) {
-                    remove();
-                    Log.e(TAG, "Erreur lors de la récuperation du tracé\n" + error);
-                }
-            });
+            }
+        }
+        if (pointsAdded) {
+            currentMarkerId = mData.getId();
+            currentRoutePolyline = context.getMap().addPolyline(options);
+            drawStopCircles(mData);
         }
     }
 
