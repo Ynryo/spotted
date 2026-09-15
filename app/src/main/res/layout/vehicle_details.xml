@@ -82,10 +82,10 @@
                 android:id="@+id/tvLigneNumero"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
+                android:background="@drawable/bg_line_badge"
                 android:gravity="center"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="5dp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
                 android:text="@string/_0"
                 android:textSize="17sp"
                 android:textStyle="bold" />

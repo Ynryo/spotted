@@ -156,7 +156,10 @@ public class MarkerStopsDetailActivity {
         int fillColor = Color.parseColor(markerStandardized.getFillColor() != null ? markerStandardized.getFillColor() : "#424242");
         int textColor = Color.parseColor(markerStandardized.getTextColor() != null ? markerStandardized.getTextColor() : "#FFFFFF");
 
-        tvLigne.setBackgroundColor(fillColor);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(context.dpToPx(8));
+        bg.setColor(fillColor);
+        tvLigne.setBackground(bg);
         tvLigne.setTextColor(textColor);
     }
 
