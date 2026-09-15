@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnCamer
     private final Runnable vehicleUpdateRunnable = new Runnable() {
         @Override
         public void run() {
-            handler.postDelayed(this, 5000);
+            handler.postDelayed(this, 15000);
             fetchMarkers();
         }
     };
