@@ -7,7 +7,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.PictureDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -31,8 +30,6 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.color.MaterialColors;
 
@@ -47,6 +44,7 @@ import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStopPlatform;
+import fr.ynryo.spotted.glideModule.SvgLoader;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.utils.Time;
 
@@ -156,7 +154,10 @@ public class MarkerStopsDetailActivity {
         int fillColor = Color.parseColor(markerStandardized.getFillColor() != null ? markerStandardized.getFillColor() : "#424242");
         int textColor = Color.parseColor(markerStandardized.getTextColor() != null ? markerStandardized.getTextColor() : "#FFFFFF");
 
-        tvLigne.setBackgroundColor(fillColor);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(context.dpToPx(8));
+        bg.setColor(fillColor);
+        tvLigne.setBackground(bg);
         tvLigne.setTextColor(textColor);
     }
 
@@ -214,11 +215,7 @@ public class MarkerStopsDetailActivity {
         }
 
         ivLogo.setVisibility(View.VISIBLE);
-        ivLogo.setBackgroundResource(R.color.surface_light);
-        ivLogo.setAdjustViewBounds(true);
-        ivLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
-        Glide.with(context).as(PictureDrawable.class).load(imgURI.toString()).diskCacheStrategy(DiskCacheStrategy.DATA).override(100, 100).into(ivLogo);
+        SvgLoader.loadSvg(context, imgURI.toString(), ivLogo, 40, 75);
     }
 
     /**

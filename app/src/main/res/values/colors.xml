@@ -13,4 +13,7 @@
 
     <color name="surface_light">#F8F9FF</color>
     <color name="surface_dark">#1A1C1E</color>
+
+    <color name="drag_handle_color">#4D79747E</color>
+    <color name="bottom_sheet_bg">@color/surface_light</color>
 </resources>
