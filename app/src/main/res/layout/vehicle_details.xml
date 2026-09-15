@@ -21,7 +21,6 @@
         android:id="@+id/closeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="14dp"
         android:contentDescription="@string/close_button_desc"
         android:src="@drawable/icon_clear_route"
@@ -29,7 +28,7 @@
         app:elevation="1dp"
         app:fabCustomSize="38dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dragHandle"
         app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Full"
         app:tint="?attr/colorOnSurface" />
 
@@ -37,7 +36,6 @@
         android:id="@+id/favoriteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
         android:contentDescription="@string/favorite_button_desc"
         android:src="@drawable/icon_favorite"
         app:backgroundTint="?attr/colorSurface"
@@ -53,7 +51,6 @@
         android:id="@+id/followButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
         android:contentDescription="@string/follow_button_desc"
         android:src="@drawable/icon_follow_disabled"
         app:backgroundTint="?attr/colorSurface"
@@ -68,61 +65,60 @@
     <!-- Line Header Row (pinned) -->
     <LinearLayout
         android:id="@+id/tvLigneRow"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginStart="16dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/followButton"
+        app:layout_constraintEnd_toStartOf="@+id/followButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/closeButton">
-
-            <TextView
-                android:id="@+id/tvLigneNumero"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_line_badge"
-                android:gravity="center"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:text="@string/_0"
-                android:textSize="17sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvDestination"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="@string/loading"
-                android:textSize="18sp"
-                android:textColor="?attr/colorOnSurface" />
+        app:layout_constraintTop_toTopOf="@+id/followButton">
 
         <ImageView
             android:id="@+id/ivNetworkLogo"
-            android:layout_width="50dp"
-            android:layout_height="36dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:contentDescription="@string/network_logo"
-            android:padding="2dp"
-            android:scaleType="fitCenter"
+            android:layout_gravity="start"
+            android:paddingEnd="8dp"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvLigneNumero"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_line_badge"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:text="@string/_0"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDestination"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="12dp"
+            android:text="@string/loading"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nsvContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         android:fillViewport="true"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvLigneRow">
+        app:layout_constraintTop_toBottomOf="@+id/followButton">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -172,10 +168,10 @@
                     android:id="@+id/rvStops"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
-                    android:paddingHorizontal="16dp"
-                    android:layout_marginBottom="16dp" />
+                    android:paddingHorizontal="16dp" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

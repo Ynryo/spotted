@@ -215,7 +215,9 @@ public class MarkerStopsDetailActivity {
         context.getFetcher().fetchNetworkData(markerStandardized.getNetworkId(), new FetchingManager.OnNetworkDataListener() {
             @Override
             public void onResponseNetworkDataListener(BusTrackerNetworkData nData) {
-                loadNetworkLogo(view, nData.getLogoHref());
+                if (nData.getDarkModeLogoHref() != null)
+                    loadNetworkLogo(view, nData.getDarkModeLogoHref());
+                else loadNetworkLogo(view, nData.getLogoHref());
             }
 
             @Override
@@ -239,9 +241,7 @@ public class MarkerStopsDetailActivity {
         }
 
         ivLogo.setVisibility(View.VISIBLE);
-        ivLogo.setBackgroundResource(R.color.surface_light);
         ivLogo.setAdjustViewBounds(true);
-        ivLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         Glide.with(context).as(PictureDrawable.class).load(imgURI.toString()).diskCacheStrategy(DiskCacheStrategy.DATA).override(100, 100).into(ivLogo);
     }

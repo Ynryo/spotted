@@ -2,6 +2,8 @@ package fr.ynryo.spotted.apiResponsesPOJO.network;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.net.URI;
 
 public class BusTrackerNetworkData {
@@ -9,7 +11,10 @@ public class BusTrackerNetworkData {
     private String ref;
     private String name;
     private String authority;
+    @SerializedName("logoHref")
     private URI logoHref;
+    @SerializedName("darkModeLogoHref")
+    private URI darkModeLogoHref;
     private int regionId;
 
     public int getId() {
@@ -30,6 +35,10 @@ public class BusTrackerNetworkData {
 
     public URI getLogoHref() {
         return logoHref;
+    }
+
+    public URI getDarkModeLogoHref() {
+        return darkModeLogoHref;
     }
 
     public int getRegionId() {
