@@ -348,6 +348,10 @@ public class MarkerStopsDetailActivity {
     }
 
     private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
+        if (itemCount == 1) {
+            return R.layout.timeline_alone_stop;
+        }
+
         boolean isFirstStop = stop.isDepartureStop();
         boolean isLastStop = position == itemCount - 1 || stop.isDestinationStop();
         if (isFirstStop) {
@@ -518,12 +522,14 @@ public class MarkerStopsDetailActivity {
 
             // Tinte la barre avec la couleur du train
             int fillColor = Color.parseColor(vehicle.getFillColor() != null ? vehicle.getFillColor() : "#424242");
+            int textColor = Color.parseColor(vehicle.getTextColor() != null ? vehicle.getTextColor() : "#FFFFFF");
 
             View lineView = timelineView.findViewById(R.id.vLineBottom);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineTop);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineFull);
             if (lineView != null)
                 ((GradientDrawable) lineView.getBackground().mutate()).setColor(fillColor);
+//                ((GradientDrawable) timelineView.findViewById(R.id.vStopDot).getBackground().mutate()).setColor(textColor);
         }
 
         private void bindPlatform(StopViewHolder vh, MarkerStop stop) {
