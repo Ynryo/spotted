@@ -8,21 +8,22 @@
     <View
         android:id="@+id/vLineBottom"
         android:layout_width="20dp"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="-2dp"
         android:background="@drawable/timeline_bar_top_round"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/vStopDot" />
 
     <View
         android:id="@+id/vStopDot"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="2dp"
         android:background="@drawable/timeline_dot_solid"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/vLineBottom" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
