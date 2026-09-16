@@ -76,7 +76,7 @@ public class MarkerStopsDetailActivity {
                 @Override
                 public void onStateChanged(@NonNull View bottomSheet, int newState) {
                     if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        if (context != null && context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
+                        if (context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
                             context.getMarkerArtist().getRouteArtist().remove();
                         }
                     }
@@ -348,10 +348,6 @@ public class MarkerStopsDetailActivity {
     }
 
     private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
-        if (itemCount == 1) {
-            return R.layout.timeline_alone_stop;
-        }
-
         boolean isFirstStop = stop.isDepartureStop();
         boolean isLastStop = position == itemCount - 1 || stop.isDestinationStop();
         if (isFirstStop) {
