@@ -76,7 +76,7 @@ public class MarkerStopsDetailActivity {
                 @Override
                 public void onStateChanged(@NonNull View bottomSheet, int newState) {
                     if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        if (context != null && context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
+                        if (context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
                             context.getMarkerArtist().getRouteArtist().remove();
                         }
                     }
@@ -450,12 +450,14 @@ public class MarkerStopsDetailActivity {
 
             // Tinte la barre avec la couleur du train
             int fillColor = Color.parseColor(vehicle.getFillColor() != null ? vehicle.getFillColor() : "#424242");
+            int textColor = Color.parseColor(vehicle.getTextColor() != null ? vehicle.getTextColor() : "#FFFFFF");
 
             View lineView = timelineView.findViewById(R.id.vLineBottom);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineTop);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineFull);
             if (lineView != null)
                 ((GradientDrawable) lineView.getBackground().mutate()).setColor(fillColor);
+//                ((GradientDrawable) timelineView.findViewById(R.id.vStopDot).getBackground().mutate()).setColor(textColor);
         }
 
         private void bindPlatform(StopViewHolder vh, MarkerStop stop) {
