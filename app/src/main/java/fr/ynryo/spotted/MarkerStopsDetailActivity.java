@@ -41,6 +41,7 @@ import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStopPlatform;
+import fr.ynryo.spotted.genericMarkerDatas.StopStatus;
 import fr.ynryo.spotted.glideModule.SvgLoader;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.utils.Time;
@@ -279,11 +280,10 @@ public class MarkerStopsDetailActivity {
 
     private static int getTimelineLayout(MarkerStop stop) {
         if (stop != null) {
-            if (stop.isDepartureStop()) {
-                return R.layout.timeline_first_stop;
-            } else if (stop.isDestinationStop()) {
-                return R.layout.timeline_last_stop;
-            }
+            if (stop.isDepartureStop()) return R.layout.timeline_first_stop;
+            else if (stop.isDestinationStop()) return R.layout.timeline_last_stop;
+            else if (stop.getStopStatus() == StopStatus.SKIPPED)
+                return R.layout.timeline_skipped_intermediate_stop;
         }
         return R.layout.timeline_intermediate_stop;
     }
