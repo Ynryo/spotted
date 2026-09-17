@@ -46,7 +46,7 @@ public class MarkerPosition {
     @NonNull
     @Override
     public String toString() {
-        return "BusTrackerMarkerPosition{" +
+        return "MarkerPosition{" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", bearing=" + bearing +

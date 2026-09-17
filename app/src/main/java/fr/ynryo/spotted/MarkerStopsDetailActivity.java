@@ -11,7 +11,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +37,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.guessPlatform.CartoTchooGuessPlatform;
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
 import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStopPlatform;
+import fr.ynryo.spotted.genericMarkerDatas.StopStatus;
 import fr.ynryo.spotted.glideModule.SvgLoader;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.utils.Time;
@@ -190,37 +188,13 @@ public class MarkerStopsDetailActivity {
                 }
 
                 showVehicleDetails(markerStandardized, view);
-                fetchNetworkLogo(markerStandardized, view);
+                loadNetworkLogo(view, markerStandardized.getNetworkLogoHref());
             }
 
             @Override
             public void onErrorVehicleDetailsListener(String error) {
                 hideLoader(view);
                 showError(view);
-            }
-        });
-    }
-
-    /**
-     * Fetch network logo from API
-     *
-     * @param markerStandardized the marker data
-     * @param view               the view
-     */
-    private void fetchNetworkLogo(MarkerStandardized markerStandardized, View view) {
-        if (markerStandardized.getNetworkId() == 0) return;
-
-        context.getFetcher().fetchNetworkData(markerStandardized.getNetworkId(), new FetchingManager.OnNetworkDataListener() {
-            @Override
-            public void onResponseNetworkDataListener(BusTrackerNetworkData nData) {
-                if (nData.getDarkModeLogoHref() != null)
-                    loadNetworkLogo(view, nData.getDarkModeLogoHref());
-                else loadNetworkLogo(view, nData.getLogoHref());
-            }
-
-            @Override
-            public void onErrorNetworkDataListener(String error) {
-                Log.w(TAG, "Erreur lors de la récuperation du logo");
             }
         });
     }
@@ -274,8 +248,7 @@ public class MarkerStopsDetailActivity {
         context.getFavoriteManager().setFavoriteButton(view.findViewById(R.id.favoriteButton), markerStandardized);
 
         setupDestinationText(view, markerStandardized);
-        StopsAdapter adapter = setupStopsList(view, markerStandardized);
-        fetchGuessPlatforms(markerStandardized, adapter);
+        setupStopsList(view, markerStandardized);
     }
 
     /**
@@ -294,7 +267,7 @@ public class MarkerStopsDetailActivity {
         tvDestination.setSelected(true);
     }
 
-    private StopsAdapter setupStopsList(View view, MarkerStandardized markerStandardized) {
+    private void setupStopsList(View view, MarkerStandardized markerStandardized) {
         RecyclerView rvStops = view.findViewById(R.id.rvStops);
         rvStops.setLayoutManager(new LinearLayoutManager(context));
 
@@ -303,60 +276,16 @@ public class MarkerStopsDetailActivity {
         rvStops.setAdapter(adapter);
 
         view.findViewById(R.id.llStopsContent).setVisibility(View.VISIBLE);
-        return adapter;
     }
 
-    private void fetchGuessPlatforms(MarkerStandardized markerStandardized, StopsAdapter adapter) {
-        if (!markerStandardized.isTrain()) return;
-
-        String trainNum = markerStandardized.getLineNumber();
-        if (markerStandardized.isUm() && markerStandardized.getUmA() != null) {
-            trainNum = markerStandardized.getUmA().getLineNumber();
+    private static int getTimelineLayout(MarkerStop stop) {
+        if (stop != null) {
+            if (stop.isDepartureStop()) return R.layout.timeline_first_stop;
+            else if (stop.isDestinationStop()) return R.layout.timeline_last_stop;
+            else if (stop.getStopStatus() == StopStatus.SKIPPED)
+                return R.layout.timeline_skipped_intermediate_stop;
         }
-        if (trainNum == null || trainNum.isEmpty()) return;
-
-        List<MarkerStop> stops = markerStandardized.getStops();
-        for (int i = 0; i < stops.size(); i++) {
-            MarkerStop stop = stops.get(i);
-            // Si l'arrêt a déjà un quai officiel renseigné (100%), on ne fait pas de requête CartoTchoo
-            if (stop.getPlatform() != null && stop.getPlatform().getPlatformName() != null && !stop.getPlatform().getPlatformName().isEmpty()) {
-                continue;
-            }
-            final int position = i;
-            final String uic = stop.getStopRef();
-            if (uic == null || uic.isEmpty()) continue;
-
-            Log.d(TAG, "Fetching guess platform: uic=" + uic + ", trainNum=" + trainNum);
-            context.getFetcher().fetchGuestPlatform(uic, trainNum, new FetchingManager.OnGuessPlatformListener() {
-                @Override
-                public void onResponseGuessPlatformListener(List<CartoTchooGuessPlatform> cartoTchooGuessPlatform) {
-                    Log.d(TAG, "Réponse guess platform pour UIC " + uic + ": " + cartoTchooGuessPlatform);
-                    if (cartoTchooGuessPlatform != null && !cartoTchooGuessPlatform.isEmpty()) {
-                        markerStandardized.setGuessStopPlatform(uic, cartoTchooGuessPlatform);
-                        if (adapter != null) {
-                            adapter.notifyItemChanged(position);
-                        }
-                    }
-                }
-
-                @Override
-                public void onErrorGuessPlatformListener(String error) {
-                    Log.d(TAG, "Pas d'estimation de quai pour UIC " + uic + " : " + error);
-                }
-            });
-        }
-    }
-
-    private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
-        boolean isFirstStop = stop.isDepartureStop();
-        boolean isLastStop = position == itemCount - 1 || stop.isDestinationStop();
-        if (isFirstStop) {
-            return R.layout.timeline_first_stop;
-        } else if (isLastStop) {
-            return R.layout.timeline_last_stop;
-        } else {
-            return R.layout.timeline_intermediate_stop;
-        }
+        return R.layout.timeline_intermediate_stop;
     }
 
     // ==================== ADAPTER ====================
@@ -448,7 +377,7 @@ public class MarkerStopsDetailActivity {
             }
 
             MarkerStop stop = stops.get(position);
-            bindStopViewHolder((StopViewHolder) holder, stop, position, stops.size());
+            bindStopViewHolder((StopViewHolder) holder, stop);
         }
 
         /**
@@ -497,8 +426,8 @@ public class MarkerStopsDetailActivity {
             return new StopViewHolder(view);
         } //inflate item stop
 
-        private void bindStopViewHolder(StopViewHolder vh, MarkerStop stop, int position, int itemCount) { //distribute data
-            bindTimeline(vh, stop, position, itemCount);
+        private void bindStopViewHolder(StopViewHolder vh, MarkerStop stop) { //distribute data
+            bindTimeline(vh, stop);
             bindPlatform(vh, stop);
             bindStopName(vh, stop);
             bindArrivalTime(vh, stop);
@@ -507,14 +436,14 @@ public class MarkerStopsDetailActivity {
             bindDelay(vh, stop);
         }
 
-        public void bindTimeline(StopViewHolder vh, MarkerStop stop, int position, int itemCount) {
+        public void bindTimeline(StopViewHolder vh, MarkerStop stop) {
             MarkerStandardized vehicle = stop.getVehicle();
 
             vh.flTimeline.setVisibility(View.VISIBLE);
             vh.flTimeline.removeAllViews();
 
             // Inflate le layout dedans
-            View timelineView = LayoutInflater.from(context).inflate(getTimelineLayout(stop, position, itemCount), vh.flTimeline, true);
+            View timelineView = LayoutInflater.from(context).inflate(getTimelineLayout(stop), vh.flTimeline, true);
 
             // Tinte la barre avec la couleur du train
             int fillColor = Color.parseColor(vehicle.getFillColor() != null ? vehicle.getFillColor() : "#424242");
@@ -560,7 +489,7 @@ public class MarkerStopsDetailActivity {
 
         private int getStopIconResource(MarkerStop stop) {
             if (stop.cantPickup()) return R.drawable.icon_logout;
-            if (stop.cantDropoff()) return R.drawable.icon_login;
+            if (stop.cantDropOff()) return R.drawable.icon_login;
             return 0;
         }
 
