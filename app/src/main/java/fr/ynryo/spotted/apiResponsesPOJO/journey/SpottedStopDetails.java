@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+import fr.ynryo.spotted.genericMarkerDatas.StopStatus;
+import fr.ynryo.spotted.genericMarkerDatas.StopType;
+
 public class SpottedStopDetails {
     @SerializedName("stopName")
     private String stopName;
@@ -68,8 +71,18 @@ public class SpottedStopDetails {
         return stopUIC;
     }
 
-    public String getStopType() {
-        return stopType;
+    public StopType getStopType() {
+        switch (stopType) {
+            case "START":
+                return StopType.START;
+            case "INTERMEDIATE":
+                return StopType.INTERMEDIATE;
+            case "SPLIT":
+                return StopType.SPLIT;
+            case "END":
+                return StopType.END;
+        }
+        return StopType.INTERMEDIATE;
     }
 
     public String getArrivalAimedTime() {
@@ -100,8 +113,16 @@ public class SpottedStopDetails {
         return departureTimeDifference;
     }
 
-    public String getCallStatus() {
-        return callStatus;
+    public StopStatus getCallStatus() {
+        switch (callStatus) {
+            case "SCHEDULED":
+                return StopStatus.SCHEDULED;
+            case "UNSCHEDULED":
+                return StopStatus.UNSCHEDULED;
+            case "SKIPPED":
+                return StopStatus.SKIPPED;
+        }
+        return StopStatus.SCHEDULED;
     }
 
     public double getDistanceTraveled() {

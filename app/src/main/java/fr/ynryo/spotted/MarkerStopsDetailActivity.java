@@ -11,7 +11,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +37,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.ynryo.spotted.MainActivity;
-import fr.ynryo.spotted.R;
 import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
@@ -282,9 +279,9 @@ public class MarkerStopsDetailActivity {
 
     private static int getTimelineLayout(MarkerStop stop) {
         if (stop != null) {
-            if ("START".equalsIgnoreCase(stop.getTimelineStopType())) {
+            if (stop.isDepartureStop()) {
                 return R.layout.timeline_first_stop;
-            } else if ("END".equalsIgnoreCase(stop.getTimelineStopType())) {
+            } else if (stop.isDestinationStop()) {
                 return R.layout.timeline_last_stop;
             }
         }
@@ -492,7 +489,7 @@ public class MarkerStopsDetailActivity {
 
         private int getStopIconResource(MarkerStop stop) {
             if (stop.cantPickup()) return R.drawable.icon_logout;
-            if (stop.cantDropoff()) return R.drawable.icon_login;
+            if (stop.cantDropOff()) return R.drawable.icon_login;
             return 0;
         }
 

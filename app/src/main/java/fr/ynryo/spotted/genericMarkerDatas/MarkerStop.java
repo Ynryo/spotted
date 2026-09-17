@@ -14,20 +14,21 @@ public class MarkerStop {
     private Time arrivalTime; // Heure d'arrivée
     private Time departureTime; // Heure de départ
     private Long delay; // Retard/décalage par rapport à l'horaire prévu
-    private StopType stopType; // Type d'arrêt (PICKUP, DROPOFF)
     private double distanceTraveled; // Distance parcouru par le véhicule à cet arrêt
     private double latitude; // Latitude de l'arrêt
     private double longitude; // Longitude de l'arrêt
     private int stopOrder; // Position dans la liste des arrêts (0, 1, 2, ...)
     private boolean isOnLive; // Statut de l'appel (EXPECTED, ACTUAL, etc.)
-    private String timelineStopType; // Type d'arrêt pour la timeline (START, INTERMEDIATE, END)
+    private StopType stopType; // Type d'arrêt pour la timeline (START, INTERMEDIATE, END)
+    private StopStatus stopStatus;
+    private StopFlag stopFlag; // Type d'arrêt (PICKUP, DROPOFF)
     private MarkerStandardized vehicle; // Véhicle parent
 
     private final static String TAG = "MarkerStop";
 
     // ==================== CONSTRUCTEURS ====================
     public MarkerStop() {
-        this.stopType = StopType.BOTH;
+        this.stopFlag = StopFlag.BOTH;
     }
 
     public MarkerStop(MarkerStop markerStop) {
@@ -37,27 +38,28 @@ public class MarkerStop {
         this.arrivalTime = markerStop.arrivalTime;
         this.departureTime = markerStop.departureTime;
         this.delay = markerStop.delay;
-        this.stopType = markerStop.stopType;
+        this.stopFlag = markerStop.stopFlag;
         this.distanceTraveled = markerStop.distanceTraveled;
         this.latitude = markerStop.latitude;
         this.longitude = markerStop.longitude;
         this.stopOrder = markerStop.stopOrder;
         this.isOnLive = markerStop.isOnLive;
-        this.timelineStopType = markerStop.timelineStopType;
+        this.stopType = markerStop.stopType;
         this.vehicle = markerStop.vehicle;
     }
 
-    public MarkerStop(String stopRef, String stopName, Long delay, Time departureTime, int stopOrder, double longitude, double latitude, double distanceTraveled, String timelineStopType, MarkerStandardized vehicle) {
+    public MarkerStop(String stopRef, String stopName, Long delay, Time departureTime, int stopOrder, double longitude, double latitude, double distanceTraveled, StopType stopType, StopStatus stopStatus, MarkerStandardized vehicle) {
         this.stopRef = stopRef;
         this.stopName = stopName;
         this.departureTime = departureTime;
-        this.stopType = StopType.BOTH;
         this.delay = delay;
         this.stopOrder = stopOrder;
         this.distanceTraveled = distanceTraveled;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.timelineStopType = timelineStopType;
+        this.stopType = stopType;
+        this.stopStatus = stopStatus;
+        this.stopFlag = StopFlag.BOTH;
         this.vehicle = vehicle;
     }
 
@@ -88,10 +90,6 @@ public class MarkerStop {
         return delay;
     }
 
-    public StopType getStopType() {
-        return stopType;
-    }
-
     public int getStopOrder() {
         return stopOrder;
     }
@@ -116,20 +114,32 @@ public class MarkerStop {
         return isOnLive;
     }
 
-    public String getTimelineStopType() {
-        return timelineStopType;
+    public StopType getStopType() {
+        return stopType;
     }
 
-    public void setTimelineStopType(String timelineStopType) {
-        this.timelineStopType = timelineStopType;
+    public StopStatus getStopStatus() {
+        return stopStatus;
     }
 
     public boolean isDepartureStop() {
-        return "START".equalsIgnoreCase(timelineStopType);
+        return stopType == StopType.START;
     }
 
     public boolean isDestinationStop() {
-        return "END".equalsIgnoreCase(timelineStopType);
+        return stopType == StopType.END;
+    }
+
+    public StopFlag getStopFlag() {
+        return stopFlag;
+    }
+
+    public boolean cantDropOff() {
+        return stopFlag == StopFlag.NO_DROPOFF;
+    }
+
+    public boolean cantPickup() {
+        return stopFlag == StopFlag.NO_PICKUP;
     }
 
     // ==================== SETTERS ====================
@@ -163,8 +173,8 @@ public class MarkerStop {
         this.delay = delay;
     }
 
-    public void setStopType(StopType stopType) {
-        this.stopType = stopType;
+    public void setStopType(StopFlag stopFlag) {
+        this.stopFlag = stopFlag;
     }
 
     public void setStopOrder(int stopOrder) {
@@ -185,6 +195,14 @@ public class MarkerStop {
 
     public void setOnLive(boolean onLive) {
         this.isOnLive = onLive;
+    }
+
+    public void setStopType(StopType stopType) {
+        this.stopType = stopType;
+    }
+
+    public void setStopStatus(StopStatus stopStatus) {
+        this.stopStatus = stopStatus;
     }
 
     public void setVehicle(MarkerStandardized markerStandardized) {
@@ -228,14 +246,6 @@ public class MarkerStop {
         return Color.rgb(224, 112, 7);  // Orange foncé
     }
 
-    public boolean cantDropoff() {
-        return stopType == StopType.NO_DROPOFF;
-    }
-
-    public boolean cantPickup() {
-        return stopType == StopType.NO_PICKUP;
-    }
-
     public boolean isLate() {
         return delay != null && delay > 0;
     }
@@ -258,13 +268,15 @@ public class MarkerStop {
                 ", arrivalTime='" + arrivalTime + '\'' +
                 ", departureTime='" + departureTime + '\'' +
                 ", delay=" + delay +
-                ", stopType=" + stopType +
+                ", stopFlag=" + stopFlag +
                 ", distanceTraveled=" + distanceTraveled +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", stopOrder=" + stopOrder +
                 ", isOnLive=" + isOnLive +
-                ", timelineStopType='" + timelineStopType + '\'' +
+                ", stopType='" + stopType + '\'' +
+                ", stopStatus='" + stopStatus + '\'' +
+                ", stopFlag='" + stopFlag + '\'' +
                 '}';
     }
 }

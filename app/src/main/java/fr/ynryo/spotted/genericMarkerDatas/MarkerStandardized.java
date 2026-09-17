@@ -159,6 +159,7 @@ public class MarkerStandardized {
                     stopDetails.getLatitude(),
                     stopDetails.getDistanceTraveled(),
                     stopDetails.getStopType(),
+                    stopDetails.getCallStatus(),
                     this
             );
 
@@ -177,14 +178,14 @@ public class MarkerStandardized {
 
             if (stopDetails.getFlags() != null) {
                 if (stopDetails.getFlags().contains("NO_PICKUP")) {
-                    stop.setStopType(StopType.NO_PICKUP);
+                    stop.setStopType(StopFlag.NO_PICKUP);
                 } else if (stopDetails.getFlags().contains("NO_DROPOFF")) {
-                    stop.setStopType(StopType.NO_DROPOFF);
+                    stop.setStopType(StopFlag.NO_DROPOFF);
                 } else {
-                    stop.setStopType(StopType.BOTH);
+                    stop.setStopType(StopFlag.BOTH);
                 }
             } else {
-                stop.setStopType(StopType.BOTH);
+                stop.setStopType(StopFlag.BOTH);
             }
 
             this.markerTrip.getStops().add(stop);
