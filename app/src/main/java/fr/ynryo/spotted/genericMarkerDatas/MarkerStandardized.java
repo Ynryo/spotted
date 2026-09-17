@@ -136,30 +136,27 @@ public class MarkerStandardized {
             boolean isRealtime = expectedTime != null;
 
             Long delay = null;
-            if (stopDetails.getDepartureTimeDifference() != null) {
+            if (stopDetails.getDepartureTimeDifference() != null)
                 delay = stopDetails.getDepartureTimeDifference().longValue();
-            } else if (stopDetails.getArrivalTimeDifference() != null) {
+            else if (stopDetails.getArrivalTimeDifference() != null)
                 delay = stopDetails.getArrivalTimeDifference().longValue();
-            } else {
-                delay = Time.calculateDelayMinutes(aimedTime, expectedTime);
-            }
+            else delay = Time.calculateDelayMinutes(aimedTime, expectedTime);
 
             String stopRef = stopDetails.getStopUIC();
-            if (stopRef == null || stopRef.isEmpty()) {
-                stopRef = stopDetails.getStopName();
-            }
+            if (stopRef == null || stopRef.isEmpty()) stopRef = stopDetails.getStopName();
 
             MarkerStop stop = new MarkerStop(
                     stopRef,
                     stopDetails.getStopName(),
                     delay,
                     isRealtime ? expectedTime : aimedTime,
-                    stopDetails.getStopOrder(),
+                    isRealtime, stopDetails.getStopOrder(),
                     stopDetails.getLongitude(),
                     stopDetails.getLatitude(),
                     stopDetails.getDistanceTraveled(),
                     stopDetails.getStopType(),
                     stopDetails.getCallStatus(),
+                    stopDetails.getFlags(),
                     this
             );
 
@@ -172,20 +169,6 @@ public class MarkerStandardized {
                 stop.setPlatform(
                         new MarkerStopPlatform(stopDetails.getPlatform().getName(), stopRef, (int) stopDetails.getPlatform().getPercentage())
                 );
-            }
-
-            stop.setOnLive(isRealtime);
-
-            if (stopDetails.getFlags() != null) {
-                if (stopDetails.getFlags().contains("NO_PICKUP")) {
-                    stop.setStopType(StopFlag.NO_PICKUP);
-                } else if (stopDetails.getFlags().contains("NO_DROPOFF")) {
-                    stop.setStopType(StopFlag.NO_DROPOFF);
-                } else {
-                    stop.setStopType(StopFlag.BOTH);
-                }
-            } else {
-                stop.setStopType(StopFlag.BOTH);
             }
 
             this.markerTrip.getStops().add(stop);

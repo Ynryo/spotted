@@ -2,8 +2,10 @@ package fr.ynryo.spotted.apiResponsesPOJO.journey;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import fr.ynryo.spotted.genericMarkerDatas.StopFlag;
 import fr.ynryo.spotted.genericMarkerDatas.StopStatus;
 import fr.ynryo.spotted.genericMarkerDatas.StopType;
 
@@ -141,7 +143,18 @@ public class SpottedStopDetails {
         return platform;
     }
 
-    public List<String> getFlags() {
-        return flags;
+    public List<StopFlag> getFlags() {
+        List<StopFlag> stopFlags = new ArrayList<>();
+        for (String flag : flags) {
+            switch (flag) {
+                case "NO_PICKUP":
+                    stopFlags.add(StopFlag.NO_PICKUP);
+                case "NO_DROPOFF":
+                    stopFlags.add(StopFlag.NO_DROPOFF);
+                default:
+                    stopFlags.add(StopFlag.BOTH);
+            }
+        }
+        return stopFlags;
     }
 }

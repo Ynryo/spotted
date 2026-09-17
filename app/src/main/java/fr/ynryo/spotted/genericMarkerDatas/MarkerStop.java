@@ -5,6 +5,9 @@ import android.graphics.Color;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.ynryo.spotted.utils.Time;
 
 public class MarkerStop {
@@ -21,24 +24,25 @@ public class MarkerStop {
     private boolean isOnLive; // Statut de l'appel (EXPECTED, ACTUAL, etc.)
     private StopType stopType; // Type d'arrêt pour la timeline (START, INTERMEDIATE, END)
     private StopStatus stopStatus;
-    private StopFlag stopFlag; // Type d'arrêt (PICKUP, DROPOFF)
+    private List<StopFlag> stopFlags; // Type d'arrêt (PICKUP, DROPOFF)
     private MarkerStandardized vehicle; // Véhicle parent
 
     private final static String TAG = "MarkerStop";
 
     // ==================== CONSTRUCTEURS ====================
     public MarkerStop() {
-        this.stopFlag = StopFlag.BOTH;
+        this.stopFlags = new ArrayList<>();
+        this.stopFlags.add(StopFlag.BOTH);
     }
 
-    public MarkerStop(MarkerStop markerStop) {
+    public MarkerStop(MarkerStop markerStop) { //TODO: faut faire quelque chose là parce que là c'st la merde (envoyer message theo)
         this.stopRef = markerStop.stopRef;
         this.stopName = markerStop.stopName;
         this.platform = markerStop.platform;
         this.arrivalTime = markerStop.arrivalTime;
         this.departureTime = markerStop.departureTime;
         this.delay = markerStop.delay;
-        this.stopFlag = markerStop.stopFlag;
+        this.stopFlags = markerStop.stopFlags;
         this.distanceTraveled = markerStop.distanceTraveled;
         this.latitude = markerStop.latitude;
         this.longitude = markerStop.longitude;
@@ -48,18 +52,20 @@ public class MarkerStop {
         this.vehicle = markerStop.vehicle;
     }
 
-    public MarkerStop(String stopRef, String stopName, Long delay, Time departureTime, int stopOrder, double longitude, double latitude, double distanceTraveled, StopType stopType, StopStatus stopStatus, MarkerStandardized vehicle) {
+    public MarkerStop(String stopRef, String stopName, Long delay, Time departureTime, boolean isOnLive, int stopOrder, double longitude, double latitude, double distanceTraveled, StopType stopType, StopStatus stopStatus, List<StopFlag> stopFlag, MarkerStandardized vehicle) {
+        this();
         this.stopRef = stopRef;
         this.stopName = stopName;
-        this.departureTime = departureTime;
         this.delay = delay;
+        this.departureTime = departureTime;
+        this.isOnLive = isOnLive;
         this.stopOrder = stopOrder;
-        this.distanceTraveled = distanceTraveled;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.distanceTraveled = distanceTraveled;
         this.stopType = stopType;
         this.stopStatus = stopStatus;
-        this.stopFlag = StopFlag.BOTH;
+        this.setStopFlags(stopFlag);
         this.vehicle = vehicle;
     }
 
@@ -130,16 +136,16 @@ public class MarkerStop {
         return stopType == StopType.END;
     }
 
-    public StopFlag getStopFlag() {
-        return stopFlag;
+    public List<StopFlag> getStopFlags() {
+        return stopFlags;
     }
 
     public boolean cantDropOff() {
-        return stopFlag == StopFlag.NO_DROPOFF;
+        return stopFlags.contains(StopFlag.NO_DROPOFF);
     }
 
     public boolean cantPickup() {
-        return stopFlag == StopFlag.NO_PICKUP;
+        return stopFlags.contains(StopFlag.NO_PICKUP);
     }
 
     // ==================== SETTERS ====================
@@ -173,10 +179,6 @@ public class MarkerStop {
         this.delay = delay;
     }
 
-    public void setStopType(StopFlag stopFlag) {
-        this.stopFlag = stopFlag;
-    }
-
     public void setStopOrder(int stopOrder) {
         this.stopOrder = stopOrder;
     }
@@ -203,6 +205,14 @@ public class MarkerStop {
 
     public void setStopStatus(StopStatus stopStatus) {
         this.stopStatus = stopStatus;
+    }
+
+    public void setStopFlags(List<StopFlag> stopFlags) {
+        this.stopFlags = stopFlags;
+    }
+
+    public void addStopFlag(StopFlag stopFlag) {
+        this.stopFlags.add(stopFlag);
     }
 
     public void setVehicle(MarkerStandardized markerStandardized) {
@@ -268,7 +278,7 @@ public class MarkerStop {
                 ", arrivalTime='" + arrivalTime + '\'' +
                 ", departureTime='" + departureTime + '\'' +
                 ", delay=" + delay +
-                ", stopFlag=" + stopFlag +
+                ", stopFlag=" + stopFlags +
                 ", distanceTraveled=" + distanceTraveled +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
@@ -276,7 +286,7 @@ public class MarkerStop {
                 ", isOnLive=" + isOnLive +
                 ", stopType='" + stopType + '\'' +
                 ", stopStatus='" + stopStatus + '\'' +
-                ", stopFlag='" + stopFlag + '\'' +
+                ", stopFlag='" + stopFlags + '\'' +
                 '}';
     }
 }
