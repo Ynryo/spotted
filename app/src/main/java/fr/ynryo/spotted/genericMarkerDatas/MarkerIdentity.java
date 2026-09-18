@@ -3,7 +3,7 @@ package fr.ynryo.spotted.genericMarkerDatas;
 import androidx.annotation.NonNull;
 
 public class MarkerIdentity {
-    private MarkerType markerType; // Type du véhicule (train ou bus/tram)
+    private VehicleType vehicleType; // Type du véhicule (train ou bus/tram)
     private String id; // ID unique (numéro train ou id bus tracker)
     private int lineId; // Numéro de ligne (vehicleNumber pour train et lineNumber pour le reste)
     private String lineNumber; // Numéro de ligne pour l'affichage
@@ -11,7 +11,7 @@ public class MarkerIdentity {
     private int networkId; // ID numérique du réseau (pour fetch logo)
 
     public MarkerIdentity() {
-        this.markerType = MarkerType.BUS_TRAM;
+        this.vehicleType = VehicleType.BUS_TRAM;
         this.id = "";
         this.lineId = 0;
         this.lineNumber = "";
@@ -19,21 +19,21 @@ public class MarkerIdentity {
         this.networkId = 0;
     }
 
-    public MarkerIdentity(MarkerType markerType, String id, int lineId, String lineNumber, String networkRef) {
-        this.markerType = markerType;
+    public MarkerIdentity(VehicleType vehicleType, String id, int lineId, String lineNumber, String networkRef) {
+        this.vehicleType = vehicleType;
         this.id = id;
         this.lineId = lineId;
         this.lineNumber = lineNumber;
         this.networkRef = networkRef;
     }
 
-    public MarkerIdentity(MarkerType markerType, String id, int lineId, String lineNumber, String networkRef, int networkId) {
-        this(markerType, id, lineId, lineNumber, networkRef);
+    public MarkerIdentity(VehicleType vehicleType, String id, int lineId, String lineNumber, String networkRef, int networkId) {
+        this(vehicleType, id, lineId, lineNumber, networkRef);
         this.networkId = networkId;
     }
 
-    public MarkerType getMarkerType() {
-        return markerType;
+    public VehicleType getMarkerType() {
+        return vehicleType;
     }
 
     public String getId() {
@@ -56,8 +56,8 @@ public class MarkerIdentity {
         return networkId;
     }
 
-    public void setMarkerType(MarkerType markerType) {
-        this.markerType = markerType;
+    public void setMarkerType(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     public void setId(String id) {
@@ -84,7 +84,7 @@ public class MarkerIdentity {
     @Override
     public String toString() {
         return "MarkerIdentity{" +
-                "markerType=" + markerType +
+                "vehicleType=" + vehicleType +
                 ", id='" + id + '\'' +
                 ", lineId=" + lineId +
                 ", lineNumber='" + lineNumber + '\'' +
