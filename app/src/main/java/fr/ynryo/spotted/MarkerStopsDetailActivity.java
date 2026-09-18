@@ -41,6 +41,7 @@ import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStopPlatform;
+import fr.ynryo.spotted.genericMarkerDatas.StopStatus;
 import fr.ynryo.spotted.genericMarkerDatas.StopType;
 import fr.ynryo.spotted.glideModule.SvgLoader;
 import fr.ynryo.spotted.managers.FetchingManager;
@@ -286,7 +287,6 @@ public class MarkerStopsDetailActivity {
                 case SKIPPED:
                     return R.layout.timeline_skipped_intermediate_stop;
                 case UNSCHEDULED:
-                    return R.layout.timeline_unscheduled_intermediate_stop;
                 default:
                     return R.layout.timeline_intermediate_stop;
             }
@@ -301,7 +301,7 @@ public class MarkerStopsDetailActivity {
 
     private static class StopViewHolder extends RecyclerView.ViewHolder {
         final View sllPlatformContainer;
-        final TextView tvPlatform, tvPlatformLabel, tvStopName, tvDepartureTime, tvScheduledDepartureTime, tvAtStopTime, tvArrivingTime, tvScheduledArrivingTime, tvDelay;
+        final TextView tvPlatform, tvPlatformLabel, tvStopName, tvStopSubtitle, tvDepartureTime, tvScheduledDepartureTime, tvAtStopTime, tvArrivingTime, tvScheduledArrivingTime, tvDelay;
         final ImageView ivArrivingTimeIcon, ivDepartureTimeIcon;
         final ViewFlipper vfTime;
         final FrameLayout flTimeline;
@@ -312,6 +312,7 @@ public class MarkerStopsDetailActivity {
             tvPlatform = itemView.findViewById(R.id.tvPlatform);
             tvPlatformLabel = itemView.findViewById(R.id.tvPlatformLabel);
             tvStopName = itemView.findViewById(R.id.tvStopName);
+            tvStopSubtitle = itemView.findViewById(R.id.tvStopSubtitle);
             tvDepartureTime = itemView.findViewById(R.id.tvDepartureTime);
             tvScheduledDepartureTime = itemView.findViewById(R.id.tvScheduledDepartureTime);
             tvAtStopTime = itemView.findViewById(R.id.tvAtStopTime);
@@ -439,6 +440,7 @@ public class MarkerStopsDetailActivity {
             bindTimeline(vh, stop);
             bindPlatform(vh, stop);
             bindStopName(vh, stop);
+            bindStopSubtitle(vh, stop);
             bindArrivalTime(vh, stop);
             bindAtStopTime(vh, stop);
             bindDepartureTime(vh, stop);
@@ -494,6 +496,21 @@ public class MarkerStopsDetailActivity {
 
             vh.tvStopName.setText(builder);
             vh.tvStopName.setSelected(true);
+        }
+
+        private void bindStopSubtitle(StopViewHolder vh, MarkerStop stop) {
+            if (vh.tvStopSubtitle == null) return;
+            if (stop.getStopStatus() == StopStatus.UNSCHEDULED) {
+                vh.tvStopSubtitle.setVisibility(View.VISIBLE);
+                vh.tvStopSubtitle.setText(R.string.unscheduled_stop);
+                vh.tvStopSubtitle.setTextColor(Color.parseColor("#FFB300"));
+            } else if (stop.getStopStatus() == StopStatus.SKIPPED) {
+                vh.tvStopSubtitle.setVisibility(View.VISIBLE);
+                vh.tvStopSubtitle.setText(R.string.skipped_stop);
+                vh.tvStopSubtitle.setTextColor(Color.RED);
+            } else {
+                vh.tvStopSubtitle.setVisibility(View.GONE);
+            }
         }
 
         private int getStopIconResource(MarkerStop stop) {
