@@ -95,13 +95,16 @@ public class MarkerStopsDetailActivity {
                 Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
                 View nsvContent = bottomSheetView.findViewById(R.id.nsvContent);
                 if (nsvContent != null) {
-                    nsvContent.setPadding(nsvContent.getPaddingLeft(), nsvContent.getPaddingTop(), nsvContent.getPaddingRight(), insets.bottom + context.dpToPx(16));
+                    int expandedOffset = behavior != null ? behavior.getExpandedOffset() : context.dpToPx(84);
+                    int bottomPadding = expandedOffset + insets.bottom;
+                    nsvContent.setPadding(nsvContent.getPaddingLeft(), nsvContent.getPaddingTop(), nsvContent.getPaddingRight(), bottomPadding);
                     if (nsvContent instanceof NestedScrollView) {
                         ((NestedScrollView) nsvContent).setClipToPadding(false);
                     }
                 }
                 return windowInsets;
             });
+            ViewCompat.requestApplyInsets(bottomSheetView);
         }
     }
 
