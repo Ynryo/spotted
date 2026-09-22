@@ -2,7 +2,7 @@ package fr.ynryo.spotted.apiResponsesPOJO.markers;
 
 import androidx.annotation.NonNull;
 
-public class BusTrackerMarkerPosition {
+public class SpottedMarkerPosition {
     private double latitude;
     private double longitude;
     private float bearing;
@@ -32,7 +32,7 @@ public class BusTrackerMarkerPosition {
     @NonNull
     @Override
     public String toString() {
-        return "BusTrackerMarkerPosition{" +
+        return "SpottedMarkerPosition{" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", bearing=" + bearing +

@@ -3,15 +3,13 @@ package fr.ynryo.spotted.genericMarkerDatas;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.guessPlatform.CartoTchooGuessPlatform;
-import fr.ynryo.spotted.apiResponsesPOJO.markers.BusTrackerMarkerData;
-import fr.ynryo.spotted.apiResponsesPOJO.vehicle.BusTrackerVehicleDetails;
-import fr.ynryo.spotted.apiResponsesPOJO.vehicle.BusTrackerVehicleStopDetails;
+import fr.ynryo.spotted.apiResponsesPOJO.journey.SpottedJourneyDetails;
+import fr.ynryo.spotted.apiResponsesPOJO.journey.SpottedStopDetails;
+import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkerData;
 import fr.ynryo.spotted.utils.Time;
 
 public class MarkerStandardized {
@@ -27,6 +25,7 @@ public class MarkerStandardized {
 
     // ==================== DONNÉES DE VOYAGE ====================
     private MarkerTrip markerTrip;
+    private URI networkLogoHref; // Logo du réseau (provenant de l'API journey)
 
     // ==================== MÉTADONNÉES ====================
     private boolean isFollowed; // Est-ce que l'utilisateur suit ce véhicule?
@@ -55,44 +54,44 @@ public class MarkerStandardized {
 
     // ==================== CONVERSION & FACTORY ====================
     /**
-     * Converts a {@link BusTrackerMarkerData} object into a {@link MarkerStandardized} object with the specified {@link MarkerType}.
+     * Converts a {@link SpottedMarkerData} object into a {@link MarkerStandardized} object with the specified {@link MarkerType}.
      *
-     * @param busTrackerMarkerData the source {@link BusTrackerMarkerData} object containing the data to be converted
-     * @param type                 the {@link MarkerType} to be associated with the resulting {@link MarkerStandardized} object
-     * @return a {@link MarkerStandardized} object populated with the data from the given {@link BusTrackerMarkerData} and the specified {@link MarkerType}
+     * @param markerData the source {@link SpottedMarkerData} object containing the data to be converted
+     * @param type       the {@link MarkerType} to be associated with the resulting {@link MarkerStandardized} object
+     * @return a {@link MarkerStandardized} object populated with the data from the given {@link SpottedMarkerData} and the specified {@link MarkerType}
      */
-    public static MarkerStandardized createNewMarkerFrom(@NonNull BusTrackerMarkerData busTrackerMarkerData, @NonNull MarkerType type) {
+    public static MarkerStandardized createNewMarkerFrom(@NonNull SpottedMarkerData markerData, @NonNull MarkerType type) {
         MarkerStandardized marker = new MarkerStandardized();
 
         boolean isTrain = (type == MarkerType.TRAIN);
         int lineId = 0;
-        if (isTrain && busTrackerMarkerData.getVehicleNumber() != null) {
+        if (isTrain && markerData.getVehicleNumber() != null) {
             try {
-                lineId = Integer.parseInt(busTrackerMarkerData.getVehicleNumber());
+                lineId = Integer.parseInt(markerData.getVehicleNumber());
             } catch (NumberFormatException ignored) {
             }
         }
-        String lineNumber = isTrain ? busTrackerMarkerData.getVehicleNumber() : busTrackerMarkerData.getLineNumber();
+        String lineNumber = isTrain ? markerData.getVehicleNumber() : markerData.getLineNumber();
 
         marker.markerIdentity = new MarkerIdentity(
                 type,
-                busTrackerMarkerData.getId(),
+                markerData.getId(),
                 lineId,
                 lineNumber,
-                busTrackerMarkerData.getNetworkRef()
+                markerData.getNetworkRef()
         );
-        if (busTrackerMarkerData.getPosition() != null) {
+        if (markerData.getPosition() != null) {
             marker.markerPosition = new MarkerPosition(
-                    busTrackerMarkerData.getPosition().getLatitude(),
-                    busTrackerMarkerData.getPosition().getLongitude(),
-                    busTrackerMarkerData.getPosition().getBearing()
+                    markerData.getPosition().getLatitude(),
+                    markerData.getPosition().getLongitude(),
+                    markerData.getPosition().getBearing()
             );
         } else {
             marker.markerPosition = new MarkerPosition();
         }
         marker.markerStyle = new MarkerStyle(
-                busTrackerMarkerData.getColor(),
-                busTrackerMarkerData.getFillColor()
+                markerData.getColor(),
+                markerData.getFillColor()
         );
         marker.createdAt = Time.now();
         marker.lastUpdatedAt = Time.now();
@@ -104,95 +103,91 @@ public class MarkerStandardized {
     // ==================== HYDRATATION DES DONNÉES ====================
 
     /**
-     * Met à jour les détails de l'instance du véhicule actuel à l'aide de l'objet {@code BusTrackerVehicleDetails} fourni.
-     * Remplit divers champs tels que l'identifiant de la ligne, la destination, l'identifiant du réseau, la référence de parcours, les arrêts,
-     * ainsi que d'autres attributs liés au trajet du véhicule et aux données en temps réel.
+     * Met à jour les détails du véhicule depuis l'objet {@link SpottedJourneyDetails} de la nouvelle API.
      *
-     * @param busTrackerVehicleDetails Un objet {@link BusTrackerVehicleDetails} non nul contenant les détails tels que l'identifiant de ligne,
-     *                                 la destination, l'identifiant réseau, la référence de parcours et la liste des arrêts du véhicule.
+     * @param journeyDetails Les détails complets du trajet fournis par l'API Spotted
      */
-    public void setVehicleDetails(@NonNull BusTrackerVehicleDetails busTrackerVehicleDetails) {
-        this.markerIdentity.setLineId(busTrackerVehicleDetails.getLineId());
-        this.markerTrip.setDestination(busTrackerVehicleDetails.getDestination());
-        this.markerIdentity.setNetworkId(busTrackerVehicleDetails.getNetworkId());
-        this.markerTrip.setPathRef(busTrackerVehicleDetails.getPathRef());
-        this.markerTrip.setAtStop(busTrackerVehicleDetails.getPosition().isAtStop());
-        this.markerTrip.setDistanceTraveled(busTrackerVehicleDetails.getPosition().getDistanceTraveled());
+    public void setJourneyDetails(@NonNull SpottedJourneyDetails journeyDetails) {
+        this.markerIdentity.setLineId(journeyDetails.getLineId());
+        this.markerTrip.setDestination(journeyDetails.getDestination());
+        if (journeyDetails.getNetwork() != null) {
+            this.markerIdentity.setNetworkId(journeyDetails.getNetwork().getId());
+        }
+        if (journeyDetails.getPath() != null) {
+            this.markerTrip.setPathRef(journeyDetails.getPath().getId());
+        }
+        if (journeyDetails.getPosition() != null) {
+            this.markerTrip.setAtStop(journeyDetails.getPosition().isAtStop());
+            this.markerTrip.setDistanceTraveled(journeyDetails.getPosition().getDistanceTraveled());
+        }
 
-        if (busTrackerVehicleDetails.getCalls() == null || busTrackerVehicleDetails.getCalls().isEmpty())
+        if (journeyDetails.getStops() == null || journeyDetails.getStops().isEmpty())
             return;
         this.markerTrip.getStops().clear();
 
-        for (int i = 0; i < busTrackerVehicleDetails.getCalls().size(); i++) { //calls = stops
-            BusTrackerVehicleStopDetails busTrackerVehicleStopDetails = busTrackerVehicleDetails.getCalls().get(i);
+        for (int i = 0; i < journeyDetails.getStops().size(); i++) {
+            SpottedStopDetails stopDetails = journeyDetails.getStops().get(i);
 
-            Time aimedTime = Time.parse(busTrackerVehicleStopDetails.getAimedTime());
-            Time expectedTime = Time.parse(busTrackerVehicleStopDetails.getExpectedTime());
+            String rawAimed = stopDetails.getDepartureAimedTime() != null ? stopDetails.getDepartureAimedTime() : stopDetails.getArrivalAimedTime();
+            String rawExpected = stopDetails.getDepartureExpectedTime() != null ? stopDetails.getDepartureExpectedTime() : stopDetails.getArrivalExpectedTime();
+
+            Time aimedTime = Time.parse(rawAimed);
+            Time expectedTime = Time.parse(rawExpected);
             boolean isRealtime = expectedTime != null;
 
-            String stopRef = isTrain() ? busTrackerVehicleStopDetails.getStopUIC() : busTrackerVehicleStopDetails.getStopRef();
+            Long delay = null;
+            if (stopDetails.getDepartureTimeDifference() != null)
+                delay = stopDetails.getDepartureTimeDifference().longValue();
+            else if (stopDetails.getArrivalTimeDifference() != null)
+                delay = stopDetails.getArrivalTimeDifference().longValue();
+            else delay = Time.calculateDelayMinutes(aimedTime, expectedTime);
+
+            String stopRef = stopDetails.getStopUIC();
+            if (stopRef == null || stopRef.isEmpty()) stopRef = stopDetails.getStopName();
 
             MarkerStop stop = new MarkerStop(
                     stopRef,
-                    busTrackerVehicleStopDetails.getStopName(),
-                    Time.calculateDelayMinutes(aimedTime, expectedTime),
+                    stopDetails.getStopName(),
+                    delay,
                     isRealtime ? expectedTime : aimedTime,
-                    busTrackerVehicleStopDetails.getStopOrder(),
-                    busTrackerVehicleStopDetails.getLongitude(),
-                    busTrackerVehicleStopDetails.getLatitude(),
-                    busTrackerVehicleStopDetails.getDistanceTraveled(),
-                    busTrackerVehicleStopDetails.getDistanceTraveled() == 0,
-                    i == busTrackerVehicleDetails.getCalls().size() - 1,
+                    isRealtime, stopDetails.getStopOrder(),
+                    stopDetails.getLongitude(),
+                    stopDetails.getLatitude(),
+                    stopDetails.getDistanceTraveled(),
+                    stopDetails.getStopType(),
+                    stopDetails.getCallStatus(),
+                    stopDetails.getFlags(),
                     this
             );
 
-            if (busTrackerVehicleStopDetails.getPlatformName() != null) {
+            if (aimedTime != null || expectedTime != null) {
+                Time arrTime = Time.parse(stopDetails.getArrivalExpectedTime() != null ? stopDetails.getArrivalExpectedTime() : stopDetails.getArrivalAimedTime());
+                stop.setArrivalTime(arrTime != null ? arrTime : (isRealtime ? expectedTime : aimedTime));
+            }
+
+            if (stopDetails.getPlatform() != null && stopDetails.getPlatform().getName() != null) {
                 stop.setPlatform(
-                        new MarkerStopPlatform(busTrackerVehicleStopDetails.getPlatformName(), stopRef, 100)
+                        new MarkerStopPlatform(stopDetails.getPlatform().getName(), stopRef, (int) stopDetails.getPlatform().getPercentage())
                 );
             }
 
-            stop.setOnLive(isRealtime);
-
-            if (busTrackerVehicleStopDetails.getFlags() != null) {
-                if (busTrackerVehicleStopDetails.getFlags().contains("NO_PICKUP")) {
-                    stop.setStopType(StopType.NO_PICKUP);
-                } else if (busTrackerVehicleStopDetails.getFlags().contains("NO_DROPOFF")) {
-                    stop.setStopType(StopType.NO_DROPOFF);
-                } else {
-                    stop.setStopType(StopType.BOTH);
-                }
-            } else {
-                stop.setStopType(StopType.BOTH);
-            }
-
             this.markerTrip.getStops().add(stop);
+        }
+
+        if (journeyDetails.getPath() != null) {
+            this.setMarkerDataRoute(journeyDetails.getPath());
+        }
+
+        if (journeyDetails.getNetwork() != null && journeyDetails.getNetwork().getLogoHref() != null) {
+            this.networkLogoHref = journeyDetails.getNetwork().getLogoHref();
         }
 
         this.detailsLoaded = true;
         this.lastUpdatedAt = Time.now();
     }
 
-    public void setGuessStopPlatform(@NonNull String uicCode, @NonNull List<CartoTchooGuessPlatform> guessPlatforms) {
-        if (guessPlatforms == null || guessPlatforms.isEmpty()) return;
-
-        CartoTchooGuessPlatform bestGuessPlatform = Collections.max(guessPlatforms, Comparator.comparingDouble(CartoTchooGuessPlatform::getPercentage));
-        for (MarkerStop markerStop : this.markerTrip.getStops()) {
-            if (uicCode.equals(markerStop.getStopRef())) {
-                // secu pour éviter d'écraser un quai officiel à 100% par un guess platform
-                if (markerStop.getPlatform() != null && markerStop.getPlatform().getPercentage() == 100) {
-                    break;
-                }
-                markerStop.setPlatform(new MarkerStopPlatform(
-                        bestGuessPlatform.getPlatform(),
-                        uicCode,
-                        bestGuessPlatform.getPercentage()));
-                break;
-            }
-        }
-
-        this.detailsLoaded = true;
-        this.lastUpdatedAt = Time.now();
+    public URI getNetworkLogoHref() {
+        return networkLogoHref;
     }
 
     // ==================== GETTERS ====================
