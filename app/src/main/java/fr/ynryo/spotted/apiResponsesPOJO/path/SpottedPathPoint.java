@@ -12,6 +12,15 @@ public class SpottedPathPoint {
     @SerializedName("distance")
     private Double distance;
 
+    public SpottedPathPoint() {
+    }
+
+    public SpottedPathPoint(double latitude, double longitude, Double distance) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.distance = distance;
+    }
+
     public double getLatitude() {
         return latitude;
     }
