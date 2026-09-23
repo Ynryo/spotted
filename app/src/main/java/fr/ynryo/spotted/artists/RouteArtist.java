@@ -44,9 +44,7 @@ public class RouteArtist {
     }
 
     public void drawVehicleRoute(MarkerStandardized mData) {
-        if (mData == null) return;
-
-        remove();
+        if (mData == null || mData.getMarkerDataRoute() == null) return;
 
         PolylineOptions options = new PolylineOptions()
                 .width(16f)
@@ -55,24 +53,19 @@ public class RouteArtist {
                 .zIndex(2.0f);
 
         boolean pointsAdded = false;
-        boolean cancelledAdded = false;
 
-        Object routeData = mData.getMarkerDataRoute();
-        Log.d(TAG, "drawVehicleRoute marker: " + mData.getId() + ", routeData: " + (routeData != null ? routeData.getClass().getSimpleName() : "null"));
-
-        if (routeData instanceof SpottedPathResponse) {
-            SpottedPathResponse path = (SpottedPathResponse) routeData;
+        remove();
+        if (mData.getMarkerDataRoute() instanceof SpottedPathResponse) {
+            SpottedPathResponse path = (SpottedPathResponse) mData.getMarkerDataRoute();
             List<LatLng> mainPoints = path.getMainPathCoordinates();
             if (mainPoints != null && !mainPoints.isEmpty()) {
                 options.addAll(mainPoints);
                 pointsAdded = true;
-                Log.d(TAG, "Added " + mainPoints.size() + " points to main route");
-            } else {
-                Log.w(TAG, "Main path coordinates are empty for marker " + mData.getId());
             }
 
             List<List<LatLng>> cancelledSegments = path.getCancelledSegmentsCoordinates();
             if (cancelledSegments != null && !cancelledSegments.isEmpty()) {
+                // Motif pour la rubalise : tirets jaunes alternés avec le fond noir
                 List<PatternItem> yellowDashedPattern = Arrays.asList(new Dash(30), new Gap(30));
                 for (List<LatLng> segment : cancelledSegments) {
                     if (segment != null && !segment.isEmpty()) {
@@ -94,22 +87,13 @@ public class RouteArtist {
                                 .zIndex(2.5f);
                         yellowStripes.addAll(segment);
                         cancelledRoutePolylines.add(context.getMap().addPolyline(yellowStripes));
-                        cancelledAdded = true;
                     }
                 }
-                Log.d(TAG, "Added " + cancelledSegments.size() + " cancelled segments (rubalise) for marker " + mData.getId());
             }
-        } else {
-            Log.w(TAG, "routeData is not an instance of SpottedPathResponse: " + routeData);
         }
-
         if (pointsAdded) {
             currentMarkerId = mData.getId();
             currentRoutePolyline = context.getMap().addPolyline(options);
-        }
-
-        if (pointsAdded || cancelledAdded || (mData.getStops() != null && !mData.getStops().isEmpty())) {
-            currentMarkerId = mData.getId();
             drawStopCircles(mData);
         }
     }

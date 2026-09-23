@@ -14,24 +14,14 @@ public class SpottedPathResponse {
     @SerializedName("path")
     private PathData path;
 
-    @SerializedName("p")
-    private List<List<Double>> directP;
-
     @SerializedName("cancelled")
     private CancelledData cancelled;
-
-    @SerializedName("segments")
-    private List<List<List<Double>>> directSegments;
 
     @SerializedName("points")
     private List<SpottedPathPoint> points;
 
     @SerializedName("count")
     private int count;
-
-    public void setCancelled(CancelledData cancelled) {
-        this.cancelled = cancelled;
-    }
 
     public static class PathData {
         @SerializedName("p")
@@ -99,14 +89,11 @@ public class SpottedPathResponse {
      * Retourne les coordonnées ordonnées du tracé principal pour Google Maps.
      */
     public List<LatLng> getMainPathCoordinates() {
-        if (directP != null && !directP.isEmpty()) {
-            return extractLatLngFromP(directP);
+        if (path != null) {
+            return path.toLatLngList();
         }
-        if (path != null && path.getP() != null && !path.getP().isEmpty()) {
-            return extractLatLngFromP(path.getP());
-        }
-        if (points != null && !points.isEmpty()) {
-            List<LatLng> result = new ArrayList<>(points.size());
+        if (points != null) {
+            List<LatLng> result = new ArrayList<>();
             for (SpottedPathPoint pt : points) {
                 result.add(new LatLng(pt.getLatitude(), pt.getLongitude()));
             }
@@ -115,40 +102,12 @@ public class SpottedPathResponse {
         return Collections.emptyList();
     }
 
-    private static List<LatLng> extractLatLngFromP(List<List<Double>> pList) {
-        if (pList == null || pList.isEmpty()) return Collections.emptyList();
-        List<LatLng> result = new ArrayList<>(pList.size());
-        for (List<Double> coord : pList) {
-            if (coord != null && coord.size() >= 2 && coord.get(0) != null && coord.get(1) != null) {
-                result.add(new LatLng(coord.get(0), coord.get(1)));
-            }
-        }
-        return result;
-    }
-
     /**
      * Retourne la liste des segments annulés / déviés pour Google Maps.
      */
     public List<List<LatLng>> getCancelledSegmentsCoordinates() {
-        if (cancelled != null && cancelled.getSegments() != null) {
+        if (cancelled != null) {
             return cancelled.toSegmentLatLngLists();
-        }
-        if (directSegments != null && !directSegments.isEmpty()) {
-            List<List<LatLng>> result = new ArrayList<>();
-            for (List<List<Double>> segment : directSegments) {
-                if (segment != null) {
-                    List<LatLng> segmentPoints = new ArrayList<>();
-                    for (List<Double> coord : segment) {
-                        if (coord != null && coord.size() >= 2 && coord.get(0) != null && coord.get(1) != null) {
-                            segmentPoints.add(new LatLng(coord.get(0), coord.get(1)));
-                        }
-                    }
-                    if (!segmentPoints.isEmpty()) {
-                        result.add(segmentPoints);
-                    }
-                }
-            }
-            return result;
         }
         return Collections.emptyList();
     }
@@ -157,10 +116,9 @@ public class SpottedPathResponse {
         if (points != null) {
             return points;
         }
-        List<List<Double>> sourceP = directP != null ? directP : (path != null ? path.getP() : null);
-        if (sourceP != null) {
+        if (path != null && path.getP() != null) {
             List<SpottedPathPoint> converted = new ArrayList<>();
-            for (List<Double> coord : sourceP) {
+            for (List<Double> coord : path.getP()) {
                 if (coord != null && coord.size() >= 2 && coord.get(0) != null && coord.get(1) != null) {
                     Double dist = coord.size() > 2 ? coord.get(2) : null;
                     converted.add(new SpottedPathPoint(coord.get(0), coord.get(1), dist));

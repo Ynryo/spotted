@@ -10,7 +10,6 @@ import java.util.List;
 import fr.ynryo.spotted.apiResponsesPOJO.journey.SpottedJourneyDetails;
 import fr.ynryo.spotted.apiResponsesPOJO.journey.SpottedStopDetails;
 import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkerData;
-import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathResponse;
 import fr.ynryo.spotted.utils.Time;
 
 public class MarkerStandardized {
@@ -176,14 +175,7 @@ public class MarkerStandardized {
         }
 
         if (journeyDetails.getPath() != null) {
-            if (journeyDetails.getCancelled() != null && journeyDetails.getPath().getCancelled() == null) {
-                journeyDetails.getPath().setCancelled(journeyDetails.getCancelled());
-            }
             this.setMarkerDataRoute(journeyDetails.getPath());
-        } else if (journeyDetails.getCancelled() != null) {
-            SpottedPathResponse pathWithCancelled = new SpottedPathResponse();
-            pathWithCancelled.setCancelled(journeyDetails.getCancelled());
-            this.setMarkerDataRoute(pathWithCancelled);
         }
 
         if (journeyDetails.getNetwork() != null && journeyDetails.getNetwork().getLogoHref() != null) {
