@@ -11,13 +11,17 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import fr.ynryo.spotted.MainActivity;
@@ -32,6 +36,7 @@ public class RouteArtist {
     private final MainActivity context;
     private String currentMarkerId;
     private Polyline currentRoutePolyline;
+    private final List<Polyline> cancelledRoutePolylines = new ArrayList<>();
     private final List<Marker> stopMarkers = new ArrayList<>();
 
     public RouteArtist(MainActivity context) {
@@ -52,10 +57,37 @@ public class RouteArtist {
         remove();
         if (mData.getMarkerDataRoute() instanceof SpottedPathResponse) {
             SpottedPathResponse path = (SpottedPathResponse) mData.getMarkerDataRoute();
-            if (path.getPoints() != null) {
-                for (SpottedPathPoint point : path.getPoints()) {
-                    options.add(new LatLng(point.getLatitude(), point.getLongitude()));
-                    pointsAdded = true;
+            List<LatLng> mainPoints = path.getMainPathCoordinates();
+            if (mainPoints != null && !mainPoints.isEmpty()) {
+                options.addAll(mainPoints);
+                pointsAdded = true;
+            }
+
+            List<List<LatLng>> cancelledSegments = path.getCancelledSegmentsCoordinates();
+            if (cancelledSegments != null && !cancelledSegments.isEmpty()) {
+                // Motif pour la rubalise : tirets jaunes alternés avec le fond noir
+                List<PatternItem> yellowDashedPattern = Arrays.asList(new Dash(30), new Gap(30));
+                for (List<LatLng> segment : cancelledSegments) {
+                    if (segment != null && !segment.isEmpty()) {
+                        // 1. Couche inférieure : Bande noire continue
+                        PolylineOptions blackBase = new PolylineOptions()
+                                .width(16f)
+                                .color(Color.parseColor("#1A1A1A"))
+                                .geodesic(true)
+                                .zIndex(2.4f);
+                        blackBase.addAll(segment);
+                        cancelledRoutePolylines.add(context.getMap().addPolyline(blackBase));
+
+                        // 2. Couche supérieure : Tirets jaune vif alternés (effet rubalise de chantier)
+                        PolylineOptions yellowStripes = new PolylineOptions()
+                                .width(16f)
+                                .color(Color.parseColor("#FFD600"))
+                                .pattern(yellowDashedPattern)
+                                .geodesic(true)
+                                .zIndex(2.5f);
+                        yellowStripes.addAll(segment);
+                        cancelledRoutePolylines.add(context.getMap().addPolyline(yellowStripes));
+                    }
                 }
             }
         }
@@ -125,13 +157,17 @@ public class RouteArtist {
             currentRoutePolyline.remove();
             currentRoutePolyline = null;
         }
+        for (Polyline p : cancelledRoutePolylines) {
+            p.remove();
+        }
+        cancelledRoutePolylines.clear();
         for (Marker m : stopMarkers) m.remove();
         stopMarkers.clear();
         currentMarkerId = null;
     }
 
     public boolean hasRoute() {
-        return currentRoutePolyline != null;
+        return currentRoutePolyline != null || !cancelledRoutePolylines.isEmpty();
     }
 
     public boolean isDrew(String markerId) {
