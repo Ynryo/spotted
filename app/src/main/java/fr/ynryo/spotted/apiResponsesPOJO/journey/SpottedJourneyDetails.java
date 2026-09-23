@@ -39,6 +39,9 @@ public class SpottedJourneyDetails {
     @SerializedName("path")
     private SpottedPathResponse path;
 
+    @SerializedName("cancelled")
+    private SpottedPathResponse.CancelledData cancelled;
+
     @SerializedName("updatedAt")
     private String updatedAt;
 
@@ -80,6 +83,10 @@ public class SpottedJourneyDetails {
 
     public SpottedPathResponse getPath() {
         return path;
+    }
+
+    public SpottedPathResponse.CancelledData getCancelled() {
+        return cancelled;
     }
 
     public String getUpdatedAt() {

@@ -53,4 +53,30 @@ public class SpottedPathResponseTest {
         assertNull(points.get(0).getDistance());
         assertEquals(Double.valueOf(1.1), points.get(1).getDistance());
     }
+
+    @Test
+    public void testDeserializeDirectPFormat() {
+        String json = "{\"p\":[[47.240181,-1.591255,11009.6],[47.24044,-1.591748,11056.6]]}";
+        Gson gson = new Gson();
+        SpottedPathResponse response = gson.fromJson(json, SpottedPathResponse.class);
+
+        assertNotNull(response);
+        List<LatLng> coords = response.getMainPathCoordinates();
+        assertEquals(2, coords.size());
+        assertEquals(47.240181, coords.get(0).latitude, 0.00001);
+        assertEquals(-1.591255, coords.get(0).longitude, 0.00001);
+    }
+
+    @Test
+    public void testDeserializeVerbosePointsFormat() {
+        String json = "{\"id\":\"NAOLIB:123\",\"points\":[{\"latitude\":47.24,\"longitude\":-1.59,\"distance\":100.0}],\"count\":1}";
+        Gson gson = new Gson();
+        SpottedPathResponse response = gson.fromJson(json, SpottedPathResponse.class);
+
+        assertNotNull(response);
+        List<LatLng> coords = response.getMainPathCoordinates();
+        assertEquals(1, coords.size());
+        assertEquals(47.24, coords.get(0).latitude, 0.00001);
+        assertEquals(-1.59, coords.get(0).longitude, 0.00001);
+    }
 }
