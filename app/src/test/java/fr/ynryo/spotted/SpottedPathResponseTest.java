@@ -17,40 +17,43 @@ import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathResponse;
 public class SpottedPathResponseTest {
 
     @Test
-    public void testDeserializeCompactPathAndCancelledSegments() {
+    public void testDeserializeSegmentsAndDeviatedSegments() {
         String json = "{"
-                + "\"path\":{\"p\":[[47.6868,-3.00771,null],[47.68679,-3.00771,1.1],[47.68679,-3.0077,1.9]]},"
-                + "\"cancelled\":{\"segments\":[[[47.67956,-3.00355],[47.67945,-3.00522]]]}"
+                + "\"segments\":[[{\"latitude\":46.581367,\"longitude\":0.335801,\"distance\":null},{\"latitude\":46.58119,\"longitude\":0.33578,\"distance\":12.5}]],"
+                + "\"deviatedSegments\":[[{\"latitude\":49.349405,\"longitude\":1.095599},{\"latitude\":49.349433,\"longitude\":1.095506}]]"
                 + "}";
 
         Gson gson = new Gson();
         SpottedPathResponse response = gson.fromJson(json, SpottedPathResponse.class);
 
         assertNotNull(response);
-        assertNotNull(response.getPath());
-        assertNotNull(response.getCancelled());
+        assertNotNull(response.getSegments());
+        assertNotNull(response.getDeviatedSegments());
 
         // Main path LatLng
         List<LatLng> mainCoordinates = response.getMainPathCoordinates();
-        assertEquals(3, mainCoordinates.size());
-        assertEquals(47.6868, mainCoordinates.get(0).latitude, 0.00001);
-        assertEquals(-3.00771, mainCoordinates.get(0).longitude, 0.00001);
-        assertEquals(47.68679, mainCoordinates.get(1).latitude, 0.00001);
+        assertEquals(2, mainCoordinates.size());
+        assertEquals(46.581367, mainCoordinates.get(0).latitude, 0.00001);
+        assertEquals(0.335801, mainCoordinates.get(0).longitude, 0.00001);
+        assertEquals(46.58119, mainCoordinates.get(1).latitude, 0.00001);
+        assertEquals(0.33578, mainCoordinates.get(1).longitude, 0.00001);
 
-        // Cancelled segments LatLng
-        List<List<LatLng>> cancelledSegments = response.getCancelledSegmentsCoordinates();
-        assertEquals(1, cancelledSegments.size());
-        List<LatLng> firstSegment = cancelledSegments.get(0);
-        assertEquals(2, firstSegment.size());
-        assertEquals(47.67956, firstSegment.get(0).latitude, 0.00001);
-        assertEquals(-3.00355, firstSegment.get(0).longitude, 0.00001);
-        assertEquals(47.67945, firstSegment.get(1).latitude, 0.00001);
+        // Cancelled / deviated segments LatLng
+        List<List<LatLng>> deviatedSegments = response.getCancelledSegmentsCoordinates();
+        assertEquals(1, deviatedSegments.size());
+        List<LatLng> firstDeviated = deviatedSegments.get(0);
+        assertEquals(2, firstDeviated.size());
+        assertEquals(49.349405, firstDeviated.get(0).latitude, 0.00001);
+        assertEquals(1.095599, firstDeviated.get(0).longitude, 0.00001);
 
-        // Backward-compatible getPoints()
+        // Flattened getPoints()
         List<SpottedPathPoint> points = response.getPoints();
-        assertEquals(3, points.size());
-        assertEquals(47.6868, points.get(0).getLatitude(), 0.00001);
+        assertEquals(2, points.size());
+        assertEquals(46.581367, points.get(0).getLatitude(), 0.00001);
         assertNull(points.get(0).getDistance());
-        assertEquals(Double.valueOf(1.1), points.get(1).getDistance());
+        assertEquals(Double.valueOf(12.5), points.get(1).getDistance());
+
+        // Count
+        assertEquals(2, response.getCount());
     }
 }
