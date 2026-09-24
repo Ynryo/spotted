@@ -36,7 +36,13 @@ public class SpottedMarkerData {
 
     public String getNetworkRef() {
         if (id == null) return "";
-        return id.split("::")[0];
+        if (id.contains("::")) {
+            return id.split("::")[0];
+        }
+        if (id.contains(":")) {
+            return id.split(":")[0];
+        }
+        return id;
     }
 
     @NonNull
