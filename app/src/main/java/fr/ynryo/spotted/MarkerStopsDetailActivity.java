@@ -284,19 +284,8 @@ public class MarkerStopsDetailActivity {
 
     private static int getTimelineLayout(MarkerStop stop) {
         if (stop == null) return R.layout.timeline_intermediate_stop;
-
-        if (stop.getStopType() == StopType.INTERMEDIATE) {
-            switch (stop.getStopStatus()) {
-                case SKIPPED:
-                    return R.layout.timeline_skipped_intermediate_stop;
-                case UNSCHEDULED:
-                default:
-                    return R.layout.timeline_intermediate_stop;
-            }
-        }
         if (stop.isDepartureStop()) return R.layout.timeline_first_stop;
-        else if (stop.isDestinationStop()) return R.layout.timeline_last_stop;
-
+        if (stop.isDestinationStop()) return R.layout.timeline_last_stop;
         return R.layout.timeline_intermediate_stop;
     }
 
@@ -466,6 +455,16 @@ public class MarkerStopsDetailActivity {
             View lineView = timelineView.findViewById(R.id.vLineBottom);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineTop);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineFull);
+
+            View dotView = timelineView.findViewById(R.id.vStopDot);
+            if (dotView != null) {
+                if (stop.getStopStatus() == StopStatus.SKIPPED) {
+                    dotView.setBackgroundResource(R.drawable.timeline_dot_cross);
+                } else {
+                    dotView.setBackgroundResource(R.drawable.timeline_dot_solid);
+                }
+            }
+
             if (lineView != null)
                 ((GradientDrawable) lineView.getBackground().mutate()).setColor(fillColor);
 //                ((GradientDrawable) timelineView.findViewById(R.id.vStopDot).getBackground().mutate()).setColor(textColor);
