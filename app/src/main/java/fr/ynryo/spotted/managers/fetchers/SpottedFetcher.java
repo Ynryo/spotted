@@ -13,9 +13,8 @@ import java.util.List;
 import fr.ynryo.spotted.apiResponsesPOJO.journey.SpottedJourneyDetails;
 import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkerData;
 import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkersResponse;
-import fr.ynryo.spotted.apiResponsesPOJO.path.SpottedPathResponse;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
-import fr.ynryo.spotted.genericMarkerDatas.MarkerType;
+import fr.ynryo.spotted.genericMarkerDatas.VehicleType;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.services.ApiClientFactory;
 import fr.ynryo.spotted.services.SpottedApiService;
@@ -92,7 +91,7 @@ public class SpottedFetcher {
 
         for (SpottedMarkerData markerData : markerDataList) {
             try {
-                MarkerType type = MarkerType.guessFromMarkerId(markerData.getId());
+                VehicleType type = VehicleType.guessFromMarkerId(markerData.getId());
                 MarkerStandardized standardized = MarkerStandardized.createNewMarkerFrom(markerData, type);
                 result.add(standardized);
             } catch (Exception e) {

@@ -8,14 +8,14 @@ import org.junit.Test;
 
 import fr.ynryo.spotted.apiResponsesPOJO.markers.SpottedMarkerData;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
-import fr.ynryo.spotted.genericMarkerDatas.MarkerType;
+import fr.ynryo.spotted.genericMarkerDatas.VehicleType;
 
 public class SpottedMarkerStandardizedTest {
 
     @Test
     public void testCreateNewMarkerFromWithNullOrEmptyFieldsDoesNotThrow() {
         SpottedMarkerData markerData = new SpottedMarkerData();
-        MarkerType type = MarkerType.guessFromMarkerId(markerData.getId());
+        VehicleType type = VehicleType.guessFromMarkerId(markerData.getId());
 
         MarkerStandardized standardized = MarkerStandardized.createNewMarkerFrom(markerData, type);
         assertNotNull(standardized);

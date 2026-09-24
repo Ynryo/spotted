@@ -54,16 +54,16 @@ public class MarkerStandardized {
 
     // ==================== CONVERSION & FACTORY ====================
     /**
-     * Converts a {@link SpottedMarkerData} object into a {@link MarkerStandardized} object with the specified {@link MarkerType}.
+     * Converts a {@link SpottedMarkerData} object into a {@link MarkerStandardized} object with the specified {@link VehicleType}.
      *
      * @param markerData the source {@link SpottedMarkerData} object containing the data to be converted
-     * @param type       the {@link MarkerType} to be associated with the resulting {@link MarkerStandardized} object
-     * @return a {@link MarkerStandardized} object populated with the data from the given {@link SpottedMarkerData} and the specified {@link MarkerType}
+     * @param type       the {@link VehicleType} to be associated with the resulting {@link MarkerStandardized} object
+     * @return a {@link MarkerStandardized} object populated with the data from the given {@link SpottedMarkerData} and the specified {@link VehicleType}
      */
-    public static MarkerStandardized createNewMarkerFrom(@NonNull SpottedMarkerData markerData, @NonNull MarkerType type) {
+    public static MarkerStandardized createNewMarkerFrom(@NonNull SpottedMarkerData markerData, @NonNull VehicleType type) {
         MarkerStandardized marker = new MarkerStandardized();
 
-        boolean isTrain = (type == MarkerType.TRAIN);
+        boolean isTrain = (type == VehicleType.TRAIN);
         int lineId = 0;
         if (isTrain && markerData.getVehicleNumber() != null) {
             try {
@@ -192,7 +192,7 @@ public class MarkerStandardized {
 
     // ==================== GETTERS ====================
     // --- Identité ---
-    public MarkerType getMarkerType() {
+    public VehicleType getMarkerType() {
         return markerIdentity.getMarkerType();
     }
 
@@ -314,10 +314,10 @@ public class MarkerStandardized {
     /**
      * Sets the marker type for the current instance.
      *
-     * @param markerType the MarkerType to be set
+     * @param vehicleType the VehicleType to be set
      */
-    public void setMarkerType(MarkerType markerType) {
-        this.markerIdentity.setMarkerType(markerType);
+    public void setMarkerType(VehicleType vehicleType) {
+        this.markerIdentity.setMarkerType(vehicleType);
     }
 
     /**
@@ -537,7 +537,7 @@ public class MarkerStandardized {
      * @return true if the marker type is TRAIN; false otherwise.
      */
     public boolean isTrain() {
-        return markerIdentity.getMarkerType() == MarkerType.TRAIN;
+        return markerIdentity.getMarkerType() == VehicleType.TRAIN;
     }
 
     /**
@@ -546,7 +546,7 @@ public class MarkerStandardized {
      * @return true if the marker type is BUS_TRAM; false otherwise.
      */
     public boolean isVehicle() {
-        return markerIdentity.getMarkerType() == MarkerType.BUS_TRAM;
+        return markerIdentity.getMarkerType() == VehicleType.BUS_TRAM;
     }
 
     /**
