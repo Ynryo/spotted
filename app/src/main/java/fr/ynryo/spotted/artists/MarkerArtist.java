@@ -255,7 +255,7 @@ public class MarkerArtist {
 
 
     public BitmapDescriptor createMarkerBitmapDescriptor(MarkerStandardized markerStandardized, float mapRotation, boolean shouldFollow) {
-        String cacheKey = (markerStandardized.isUm() ? "UM_" : "US_") + markerStandardized.getFillColor() + "_" + markerStandardized.getLineId() + "_" + (int) (markerStandardized.getBearing() - mapRotation) + "_" + markerStandardized.getId();
+        String cacheKey = (markerStandardized.isUm() ? "UM_" : "US_") + markerStandardized.getFillColor() + "_" + markerStandardized.getLineId() + "_" + (int) (markerStandardized.getBearing() - mapRotation) + "_" + shouldFollow;
 //        Log.d(TAG, "cacheKey=" + cacheKey + " isUm=" + markerStandardized.isUm() + " cacheHit=" + markerIconCache.containsKey(cacheKey));
 
         if (markerIconCache.containsKey(cacheKey)) {
@@ -351,6 +351,17 @@ public class MarkerArtist {
 
     public Map<String, BitmapDescriptor> getMarkerIconCache() {
         return markerIconCache;
+    }
+
+    public void clearAllMarkers() {
+        for (Marker marker : activeMarkers.values()) {
+            if (marker != null) {
+                marker.remove();
+            }
+        }
+        activeMarkers.clear();
+        activeAnimators.clear();
+        markerIconCache.clear();
     }
 
     public MarkerStopsDetailActivity getMarkerStopsDetailActivity() {

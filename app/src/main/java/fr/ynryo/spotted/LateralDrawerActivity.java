@@ -481,7 +481,9 @@ public class LateralDrawerActivity {
      * @return true si le réseau est visible, false sinon
      */
     public boolean isNetworkVisible(String networkRef) {
-        if (filters.isEmpty()) return true;
+        if (filters.isEmpty()) {
+            return saveManager != null && saveManager.loadNetworkFilter(networkRef);
+        }
         Boolean networkVisibility = filters.get(networkRef);
         return networkVisibility != null && networkVisibility;
     }
