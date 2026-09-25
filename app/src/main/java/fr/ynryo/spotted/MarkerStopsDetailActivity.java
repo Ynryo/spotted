@@ -450,7 +450,6 @@ public class MarkerStopsDetailActivity {
 
             // Tinte la barre avec la couleur du train
             int fillColor = Color.parseColor(vehicle.getFillColor() != null ? vehicle.getFillColor() : "#424242");
-            int textColor = Color.parseColor(vehicle.getTextColor() != null ? vehicle.getTextColor() : "#FFFFFF");
 
             View lineView = timelineView.findViewById(R.id.vLineBottom);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineTop);
@@ -467,7 +466,6 @@ public class MarkerStopsDetailActivity {
 
             if (lineView != null)
                 ((GradientDrawable) lineView.getBackground().mutate()).setColor(fillColor);
-//                ((GradientDrawable) timelineView.findViewById(R.id.vStopDot).getBackground().mutate()).setColor(textColor);
         }
 
         private void bindPlatform(StopViewHolder vh, MarkerStop stop) {
