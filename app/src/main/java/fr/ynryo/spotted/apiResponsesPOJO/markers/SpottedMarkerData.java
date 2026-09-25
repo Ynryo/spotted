@@ -2,11 +2,11 @@ package fr.ynryo.spotted.apiResponsesPOJO.markers;
 
 import androidx.annotation.NonNull;
 
-public class BusTrackerMarkerData {
+public class SpottedMarkerData {
     private String id;
     private String lineNumber;
     private String vehicleNumber;
-    private BusTrackerMarkerPosition position;
+    private SpottedMarkerPosition position;
     private String fillColor;
     private String color;
 
@@ -22,7 +22,7 @@ public class BusTrackerMarkerData {
         return vehicleNumber;
     }
 
-    public BusTrackerMarkerPosition getPosition() {
+    public SpottedMarkerPosition getPosition() {
         return position;
     }
 
@@ -36,13 +36,19 @@ public class BusTrackerMarkerData {
 
     public String getNetworkRef() {
         if (id == null) return "";
-        return id.split("::")[0];
+        if (id.contains("::")) {
+            return id.split("::")[0];
+        }
+        if (id.contains(":")) {
+            return id.split(":")[0];
+        }
+        return id;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "BusTrackerMarkerData{" +
+        return "SpottedMarkerData{" +
                 "id='" + id + '\'' +
                 ", lineNumber='" + lineNumber + '\'' +
                 ", vehicleNumber='" + vehicleNumber + '\'' +

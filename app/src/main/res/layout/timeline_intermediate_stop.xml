@@ -11,6 +11,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/timeline_bar_straight"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -18,9 +19,9 @@
         android:id="@+id/vStopDot"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_marginStart="2dp"
         android:background="@drawable/timeline_dot_solid"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
-import fr.ynryo.spotted.genericMarkerDatas.MarkerType;
+import fr.ynryo.spotted.genericMarkerDatas.VehicleType;
 import fr.ynryo.spotted.utils.Time;
 
 public class TrainUmAssembler {
@@ -27,7 +27,7 @@ public class TrainUmAssembler {
         String idB = trainB.getId();
         um.setId(idA.compareTo(idB) <= 0 ? idA + "+" + idB : idB + "+" + idA);
 
-        um.setMarkerType(MarkerType.TRAIN);
+        um.setMarkerType(VehicleType.TRAIN);
         um.setUmPair(trainA, trainB);
 
         um.setLatitude((trainA.getLatitude() + trainB.getLatitude()) / 2.0);

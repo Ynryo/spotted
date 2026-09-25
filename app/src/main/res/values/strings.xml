@@ -85,4 +85,6 @@
     <string name="clear_route_desc">Effacer le tracé de la ligne</string>
     <string name="platform_label">Voie</string>
     <string name="change_layers">Changer de couche GPS</string>
+    <string name="unscheduled_stop">Arrêt supplémentaire</string>
+    <string name="skipped_stop">Arrêt supprimé</string>
 </resources>

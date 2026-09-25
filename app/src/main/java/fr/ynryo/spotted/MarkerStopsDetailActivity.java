@@ -7,12 +7,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.PictureDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +29,6 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.color.MaterialColors;
 
@@ -41,12 +37,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.ynryo.spotted.apiResponsesPOJO.guessPlatform.CartoTchooGuessPlatform;
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
 import fr.ynryo.spotted.artists.MarkerArtist;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStop;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStopPlatform;
+import fr.ynryo.spotted.genericMarkerDatas.StopStatus;
+import fr.ynryo.spotted.genericMarkerDatas.StopType;
+import fr.ynryo.spotted.glideModule.SvgLoader;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.utils.Time;
 
@@ -78,7 +75,7 @@ public class MarkerStopsDetailActivity {
                 @Override
                 public void onStateChanged(@NonNull View bottomSheet, int newState) {
                     if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        if (context != null && context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
+                        if (context.getMarkerArtist() != null && context.getMarkerArtist().getRouteArtist() != null) {
                             context.getMarkerArtist().getRouteArtist().remove();
                         }
                     }
@@ -98,13 +95,16 @@ public class MarkerStopsDetailActivity {
                 Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
                 View nsvContent = bottomSheetView.findViewById(R.id.nsvContent);
                 if (nsvContent != null) {
-                    nsvContent.setPadding(nsvContent.getPaddingLeft(), nsvContent.getPaddingTop(), nsvContent.getPaddingRight(), insets.bottom + context.dpToPx(16));
+                    int expandedOffset = behavior != null ? behavior.getExpandedOffset() : context.dpToPx(84);
+                    int bottomPadding = expandedOffset + insets.bottom;
+                    nsvContent.setPadding(nsvContent.getPaddingLeft(), nsvContent.getPaddingTop(), nsvContent.getPaddingRight(), bottomPadding);
                     if (nsvContent instanceof NestedScrollView) {
                         ((NestedScrollView) nsvContent).setClipToPadding(false);
                     }
                 }
                 return windowInsets;
             });
+            ViewCompat.requestApplyInsets(bottomSheetView);
         }
     }
 
@@ -156,7 +156,10 @@ public class MarkerStopsDetailActivity {
         int fillColor = Color.parseColor(markerStandardized.getFillColor() != null ? markerStandardized.getFillColor() : "#424242");
         int textColor = Color.parseColor(markerStandardized.getTextColor() != null ? markerStandardized.getTextColor() : "#FFFFFF");
 
-        tvLigne.setBackgroundColor(fillColor);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(context.dpToPx(8));
+        bg.setColor(fillColor);
+        tvLigne.setBackground(bg);
         tvLigne.setTextColor(textColor);
     }
 
@@ -189,35 +192,13 @@ public class MarkerStopsDetailActivity {
                 }
 
                 showVehicleDetails(markerStandardized, view);
-                fetchNetworkLogo(markerStandardized, view);
+                loadNetworkLogo(view, markerStandardized.getNetworkLogoHref());
             }
 
             @Override
             public void onErrorVehicleDetailsListener(String error) {
                 hideLoader(view);
                 showError(view);
-            }
-        });
-    }
-
-    /**
-     * Fetch network logo from API
-     *
-     * @param markerStandardized the marker data
-     * @param view               the view
-     */
-    private void fetchNetworkLogo(MarkerStandardized markerStandardized, View view) {
-        if (markerStandardized.getNetworkId() == 0) return;
-
-        context.getFetcher().fetchNetworkData(markerStandardized.getNetworkId(), new FetchingManager.OnNetworkDataListener() {
-            @Override
-            public void onResponseNetworkDataListener(BusTrackerNetworkData nData) {
-                loadNetworkLogo(view, nData.getLogoHref());
-            }
-
-            @Override
-            public void onErrorNetworkDataListener(String error) {
-                Log.w(TAG, "Erreur lors de la récuperation du logo");
             }
         });
     }
@@ -236,11 +217,7 @@ public class MarkerStopsDetailActivity {
         }
 
         ivLogo.setVisibility(View.VISIBLE);
-        ivLogo.setBackgroundResource(R.color.surface_light);
-        ivLogo.setAdjustViewBounds(true);
-        ivLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
-        Glide.with(context).as(PictureDrawable.class).load(imgURI.toString()).diskCacheStrategy(DiskCacheStrategy.DATA).override(100, 100).into(ivLogo);
+        SvgLoader.loadSvg(context, imgURI.toString(), ivLogo, 40, 75);
     }
 
     /**
@@ -275,8 +252,7 @@ public class MarkerStopsDetailActivity {
         context.getFavoriteManager().setFavoriteButton(view.findViewById(R.id.favoriteButton), markerStandardized);
 
         setupDestinationText(view, markerStandardized);
-        StopsAdapter adapter = setupStopsList(view, markerStandardized);
-        fetchGuessPlatforms(markerStandardized, adapter);
+        setupStopsList(view, markerStandardized);
     }
 
     /**
@@ -295,7 +271,7 @@ public class MarkerStopsDetailActivity {
         tvDestination.setSelected(true);
     }
 
-    private StopsAdapter setupStopsList(View view, MarkerStandardized markerStandardized) {
+    private void setupStopsList(View view, MarkerStandardized markerStandardized) {
         RecyclerView rvStops = view.findViewById(R.id.rvStops);
         rvStops.setLayoutManager(new LinearLayoutManager(context));
 
@@ -304,67 +280,20 @@ public class MarkerStopsDetailActivity {
         rvStops.setAdapter(adapter);
 
         view.findViewById(R.id.llStopsContent).setVisibility(View.VISIBLE);
-        return adapter;
     }
 
-    private void fetchGuessPlatforms(MarkerStandardized markerStandardized, StopsAdapter adapter) {
-        if (!markerStandardized.isTrain()) return;
-
-        String trainNum = markerStandardized.getLineNumber();
-        if (markerStandardized.isUm() && markerStandardized.getUmA() != null) {
-            trainNum = markerStandardized.getUmA().getLineNumber();
-        }
-        if (trainNum == null || trainNum.isEmpty()) return;
-
-        List<MarkerStop> stops = markerStandardized.getStops();
-        for (int i = 0; i < stops.size(); i++) {
-            MarkerStop stop = stops.get(i);
-            // Si l'arrêt a déjà un quai officiel renseigné (100%), on ne fait pas de requête CartoTchoo
-            if (stop.getPlatform() != null && stop.getPlatform().getPlatformName() != null && !stop.getPlatform().getPlatformName().isEmpty()) {
-                continue;
-            }
-            final int position = i;
-            final String uic = stop.getStopRef();
-            if (uic == null || uic.isEmpty()) continue;
-
-            Log.d(TAG, "Fetching guess platform: uic=" + uic + ", trainNum=" + trainNum);
-            context.getFetcher().fetchGuestPlatform(uic, trainNum, new FetchingManager.OnGuessPlatformListener() {
-                @Override
-                public void onResponseGuessPlatformListener(List<CartoTchooGuessPlatform> cartoTchooGuessPlatform) {
-                    Log.d(TAG, "Réponse guess platform pour UIC " + uic + ": " + cartoTchooGuessPlatform);
-                    if (cartoTchooGuessPlatform != null && !cartoTchooGuessPlatform.isEmpty()) {
-                        markerStandardized.setGuessStopPlatform(uic, cartoTchooGuessPlatform);
-                        if (adapter != null) {
-                            adapter.notifyItemChanged(position);
-                        }
-                    }
-                }
-
-                @Override
-                public void onErrorGuessPlatformListener(String error) {
-                    Log.d(TAG, "Pas d'estimation de quai pour UIC " + uic + " : " + error);
-                }
-            });
-        }
-    }
-
-    private static int getTimelineLayout(MarkerStop stop, int position, int itemCount) {
-        boolean isFirstStop = stop.isDepartureStop();
-        boolean isLastStop = position == itemCount - 1 || stop.isDestinationStop();
-        if (isFirstStop) {
-            return R.layout.timeline_first_stop;
-        } else if (isLastStop) {
-            return R.layout.timeline_last_stop;
-        } else {
-            return R.layout.timeline_intermediate_stop;
-        }
+    private static int getTimelineLayout(MarkerStop stop) {
+        if (stop == null) return R.layout.timeline_intermediate_stop;
+        if (stop.isDepartureStop()) return R.layout.timeline_first_stop;
+        if (stop.isDestinationStop()) return R.layout.timeline_last_stop;
+        return R.layout.timeline_intermediate_stop;
     }
 
     // ==================== ADAPTER ====================
 
     private static class StopViewHolder extends RecyclerView.ViewHolder {
         final View sllPlatformContainer;
-        final TextView tvPlatform, tvPlatformLabel, tvStopName, tvDepartureTime, tvScheduledDepartureTime, tvAtStopTime, tvArrivingTime, tvScheduledArrivingTime, tvDelay;
+        final TextView tvPlatform, tvPlatformLabel, tvStopName, tvStopSubtitle, tvDepartureTime, tvScheduledDepartureTime, tvAtStopTime, tvArrivingTime, tvScheduledArrivingTime, tvDelay;
         final ImageView ivArrivingTimeIcon, ivDepartureTimeIcon;
         final ViewFlipper vfTime;
         final FrameLayout flTimeline;
@@ -375,6 +304,7 @@ public class MarkerStopsDetailActivity {
             tvPlatform = itemView.findViewById(R.id.tvPlatform);
             tvPlatformLabel = itemView.findViewById(R.id.tvPlatformLabel);
             tvStopName = itemView.findViewById(R.id.tvStopName);
+            tvStopSubtitle = itemView.findViewById(R.id.tvStopSubtitle);
             tvDepartureTime = itemView.findViewById(R.id.tvDepartureTime);
             tvScheduledDepartureTime = itemView.findViewById(R.id.tvScheduledDepartureTime);
             tvAtStopTime = itemView.findViewById(R.id.tvAtStopTime);
@@ -449,7 +379,7 @@ public class MarkerStopsDetailActivity {
             }
 
             MarkerStop stop = stops.get(position);
-            bindStopViewHolder((StopViewHolder) holder, stop, position, stops.size());
+            bindStopViewHolder((StopViewHolder) holder, stop);
         }
 
         /**
@@ -498,24 +428,25 @@ public class MarkerStopsDetailActivity {
             return new StopViewHolder(view);
         } //inflate item stop
 
-        private void bindStopViewHolder(StopViewHolder vh, MarkerStop stop, int position, int itemCount) { //distribute data
-            bindTimeline(vh, stop, position, itemCount);
+        private void bindStopViewHolder(StopViewHolder vh, MarkerStop stop) { //distribute data
+            bindTimeline(vh, stop);
             bindPlatform(vh, stop);
             bindStopName(vh, stop);
+            bindStopSubtitle(vh, stop);
             bindArrivalTime(vh, stop);
             bindAtStopTime(vh, stop);
             bindDepartureTime(vh, stop);
             bindDelay(vh, stop);
         }
 
-        public void bindTimeline(StopViewHolder vh, MarkerStop stop, int position, int itemCount) {
+        public void bindTimeline(StopViewHolder vh, MarkerStop stop) {
             MarkerStandardized vehicle = stop.getVehicle();
 
             vh.flTimeline.setVisibility(View.VISIBLE);
             vh.flTimeline.removeAllViews();
 
             // Inflate le layout dedans
-            View timelineView = LayoutInflater.from(context).inflate(getTimelineLayout(stop, position, itemCount), vh.flTimeline, true);
+            View timelineView = LayoutInflater.from(context).inflate(getTimelineLayout(stop), vh.flTimeline, true);
 
             // Tinte la barre avec la couleur du train
             int fillColor = Color.parseColor(vehicle.getFillColor() != null ? vehicle.getFillColor() : "#424242");
@@ -523,6 +454,16 @@ public class MarkerStopsDetailActivity {
             View lineView = timelineView.findViewById(R.id.vLineBottom);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineTop);
             if (lineView == null) lineView = timelineView.findViewById(R.id.vLineFull);
+
+            View dotView = timelineView.findViewById(R.id.vStopDot);
+            if (dotView != null) {
+                if (stop.getStopStatus() == StopStatus.SKIPPED) {
+                    dotView.setBackgroundResource(R.drawable.timeline_dot_cross);
+                } else {
+                    dotView.setBackgroundResource(R.drawable.timeline_dot_solid);
+                }
+            }
+
             if (lineView != null)
                 ((GradientDrawable) lineView.getBackground().mutate()).setColor(fillColor);
         }
@@ -557,9 +498,24 @@ public class MarkerStopsDetailActivity {
             vh.tvStopName.setSelected(true);
         }
 
+        private void bindStopSubtitle(StopViewHolder vh, MarkerStop stop) {
+            if (vh.tvStopSubtitle == null) return;
+            if (stop.getStopStatus() == StopStatus.UNSCHEDULED) {
+                vh.tvStopSubtitle.setVisibility(View.VISIBLE);
+                vh.tvStopSubtitle.setText(R.string.unscheduled_stop);
+                vh.tvStopSubtitle.setTextColor(Color.parseColor("#FFB300"));
+            } else if (stop.getStopStatus() == StopStatus.SKIPPED) {
+                vh.tvStopSubtitle.setVisibility(View.VISIBLE);
+                vh.tvStopSubtitle.setText(R.string.skipped_stop);
+                vh.tvStopSubtitle.setTextColor(Color.RED);
+            } else {
+                vh.tvStopSubtitle.setVisibility(View.GONE);
+            }
+        }
+
         private int getStopIconResource(MarkerStop stop) {
             if (stop.cantPickup()) return R.drawable.icon_logout;
-            if (stop.cantDropoff()) return R.drawable.icon_login;
+            if (stop.cantDropOff()) return R.drawable.icon_login;
             return 0;
         }
 

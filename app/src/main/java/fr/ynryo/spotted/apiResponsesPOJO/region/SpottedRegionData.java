@@ -2,11 +2,11 @@ package fr.ynryo.spotted.apiResponsesPOJO.region;
 
 import androidx.annotation.NonNull;
 
-public class BusTrackerRegionData {
+public class SpottedRegionData {
     private int id;
     private String name;
 
-    public BusTrackerRegionData(int id, String name) {
+    public SpottedRegionData(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -22,7 +22,7 @@ public class BusTrackerRegionData {
     @NonNull
     @Override
     public String toString() {
-        return "BusTrackerRegionData{" +
+        return "SpottedRegionData{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';

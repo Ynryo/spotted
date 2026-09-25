@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fr.ynryo.spotted.apiResponsesPOJO.network.BusTrackerNetworkData;
-import fr.ynryo.spotted.apiResponsesPOJO.region.BusTrackerRegionData;
+import fr.ynryo.spotted.apiResponsesPOJO.network.SpottedNetworkData;
+import fr.ynryo.spotted.apiResponsesPOJO.region.SpottedRegionData;
 import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 import fr.ynryo.spotted.managers.FetchingManager;
 import fr.ynryo.spotted.managers.SaveManager;
@@ -146,10 +146,10 @@ public class LateralDrawerActivity {
 
         context.getFetcher().fetchRegions(new FetchingManager.OnRegionsListener() {
             @Override
-            public void onResponseRegionsListener(List<BusTrackerRegionData> regions) {
+            public void onResponseRegionsListener(List<SpottedRegionData> regions) {
                 context.getFetcher().fetchNetworks(new FetchingManager.OnNetworkListener() {
                     @Override
-                    public void onResponseNetworkListener(List<BusTrackerNetworkData> networks) {
+                    public void onResponseNetworkListener(List<SpottedNetworkData> networks) {
                         isNetworksFiltersFetch = true;
                         populateNetworks(regions, networks);
                     }
@@ -188,7 +188,7 @@ public class LateralDrawerActivity {
      * @param regions regions
      * @param networks networks
      */
-    public void populateNetworks(List<BusTrackerRegionData> regions, List<BusTrackerNetworkData> networks) {
+    public void populateNetworks(List<SpottedRegionData> regions, List<SpottedNetworkData> networks) {
         if (saveManager == null) return;
 
         LinearLayout networksContainer = context.findViewById(R.id.networks_container);
@@ -235,28 +235,28 @@ public class LateralDrawerActivity {
 
 
         // Grouper les réseaux par région
-        Map<Integer, List<BusTrackerNetworkData>> networksByRegion = new HashMap<>();
-        Map<Integer, BusTrackerRegionData> regionMap = new HashMap<>();
+        Map<Integer, List<SpottedNetworkData>> networksByRegion = new HashMap<>();
+        Map<Integer, SpottedRegionData> regionMap = new HashMap<>();
 
         // Créer une map des régions par ID
         boolean hasNational = false;
-        for (BusTrackerRegionData r : regions) {
+        for (SpottedRegionData r : regions) {
             if (r.getId() == 0) {
                 hasNational = true;
                 break;
             }
         }
         if (!hasNational) {
-            regions.add(new BusTrackerRegionData(0, "National"));
+            regions.add(new SpottedRegionData(0, "National"));
         }
 
-        for (BusTrackerRegionData region : regions) {
+        for (SpottedRegionData region : regions) {
             Log.d(TAG, "Region: " + region.getName() + " with ID: " + region.getId());
             regionMap.put(region.getId(), region);
         }
 
         // Grouper les réseaux par région
-        for (BusTrackerNetworkData network : networks) {
+        for (SpottedNetworkData network : networks) {
             int regionId = network.getRegionId();
             if (!networksByRegion.containsKey(regionId)) {
                 String regionName = regionMap.containsKey(regionId) ? regionMap.get(regionId).getName() : "Inconnue";
@@ -267,8 +267,8 @@ public class LateralDrawerActivity {
         }
 
         // Ajouter chaque région et ses réseaux
-        for (BusTrackerRegionData region : regions) {
-            List<BusTrackerNetworkData> regionNetworks = networksByRegion.get(region.getId());
+        for (SpottedRegionData region : regions) {
+            List<SpottedNetworkData> regionNetworks = networksByRegion.get(region.getId());
             if (regionNetworks == null || regionNetworks.isEmpty()) {
                 continue; // Pas de réseaux dans cette région
             }
@@ -300,7 +300,7 @@ public class LateralDrawerActivity {
             networksContainer.addView(regionNetworksContainer);
 
             // Ajouter les réseaux de cette région
-            for (BusTrackerNetworkData network : regionNetworks) {
+            for (SpottedNetworkData network : regionNetworks) {
                 String networkRef = network.getRef();
                 boolean isVisible = saveManager.loadNetworkFilter(networkRef);
                 filters.put(networkRef, isVisible);
