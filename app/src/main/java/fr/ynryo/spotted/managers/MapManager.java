@@ -35,7 +35,7 @@ import fr.ynryo.spotted.genericMarkerDatas.MarkerStandardized;
 public class MapManager implements OnMapReadyCallback {
     private static final String TAG = "MapManager";
     public static final float DEFAULT_ZOOM = 6f;
-    public static final LatLng FRANCE = new LatLng(48.8566, 2.3522);
+    public static final LatLng FRANCE = new LatLng(46.603354, 1.888334);
 
     private final MainActivity context;
     private final FusedLocationProviderClient fusedLocationClient;
