@@ -41,7 +41,7 @@ public class SaveManager {
 
     public boolean loadNetworkFilter(String networkRef) {
         String key = KEY_PREFIX_NETWORK + networkRef;
-        return prefs.getBoolean(key, true);
+        return prefs.getBoolean(key, false);
     }
 
     public void saveAllNetworksVisibility(List<String> networkRefs, boolean isVisible) {
@@ -55,13 +55,16 @@ public class SaveManager {
 
     public boolean isAllNetworksVisible() {
         Map<String, ?> entries = prefs.getAll();
-        if (entries.isEmpty()) return true;
+        boolean hasNetworkPref = false;
         for (Map.Entry<String, ?> entry : entries.entrySet()) {
-            if (entry.getKey().startsWith(KEY_PREFIX_NETWORK) && entry.getValue().equals(false)) {
-                return false;
+            if (entry.getKey().startsWith(KEY_PREFIX_NETWORK)) {
+                hasNetworkPref = true;
+                if (entry.getValue().equals(false)) {
+                    return false;
+                }
             }
         }
-        return true;
+        return hasNetworkPref;
     }
 
     public void saveFavoriteLines(List<Favorite> favoriteLines) {
