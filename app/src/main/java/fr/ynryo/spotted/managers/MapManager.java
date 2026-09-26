@@ -143,7 +143,9 @@ public class MapManager implements OnMapReadyCallback {
     }
 
     public int getMapType() {
-        return context.getSaveManager() != null ? context.getSaveManager().loadMapType() : GoogleMap.MAP_TYPE_NORMAL;
+        if (context.getSaveManager() == null) return GoogleMap.MAP_TYPE_NORMAL;
+        int type = context.getSaveManager().loadMapType();
+        return type == GoogleMap.MAP_TYPE_NONE ? GoogleMap.MAP_TYPE_NORMAL : type;
     }
 
     public void initCameraPosition(@Nullable Runnable onAnimationFinished) {
