@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -116,12 +117,13 @@ public class SaveManager {
     }
 
     public void saveMapType(int mapType) {
-        if (mapType == 0) return;
+        if (mapType == GoogleMap.MAP_TYPE_NONE) return;
 
         prefs.edit().putInt("map_type", mapType).apply();
     }
 
     public int loadMapType() {
-        return prefs.getInt("map_type", 0);
+        int mapType = prefs.getInt("map_type", GoogleMap.MAP_TYPE_NORMAL);
+        return mapType == GoogleMap.MAP_TYPE_NONE ? GoogleMap.MAP_TYPE_NORMAL : mapType;
     }
 }
